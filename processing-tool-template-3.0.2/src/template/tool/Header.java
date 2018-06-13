@@ -1,4 +1,4 @@
-import template.tool;
+package template.tool;
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.io.*;
 import java.util.*;
@@ -6,9 +6,9 @@ import java.util.*;
 public class Header {
 	DefaultMutableTreeNode header;
 	int misc = 0;
-	int numberofSubHeaders = 0;
+	Integer numberofSubHeaders = 0;
 	ArrayList<DefaultMutableTreeNode> miscLeaves = new ArrayList<DefaultMutableTreeNode>();
-	LinkedHashMap<SubHeader, int> subHeader_Number = new LinkedHashMap();
+	LinkedHashMap<SubHeader, Integer> subHeader_Number = new LinkedHashMap();
 	
 	public Header(String headerName) {
 		header = new DefaultMutableTreeNode(headerName);
@@ -22,7 +22,7 @@ public class Header {
 		misc = numInput;
 	}
 	
-	public void set_numberofSubHeaders(int numInput) {
+	public void set_numberofSubHeaders(Integer numInput) {
 		numberofSubHeaders = numInput;
 	}
 //	
@@ -38,22 +38,23 @@ public class Header {
 		return header;
 	}
 	
-	public int get_numberofSubHeaders() {
+	public Integer get_numberofSubHeaders() {
 		return numberofSubHeaders;
 	}
+	
 	public void add_miscLeaves(String leaf) {
-		DefaultMutableTreeNode temp = new DefaultMutablTreeNode(leaf);
+		DefaultMutableTreeNode temp = new DefaultMutableTreeNode(leaf);
 		miscLeaves.add(temp);
 		header.add(temp);
 	}
 	
-	public LinkedHashMap<SubHeader, int> get_subHeader_Number() {
+	public LinkedHashMap<SubHeader, Integer> get_subHeader_Number() {
 		return subHeader_Number;
 	}
 	
-	public void add_subHeaders {
-		for(DefaultMutableTreeNode subHeader : subHeader_Number.keySet()) {
-			header.add(subHeader);
+	public void add_subHeaders() {
+		for(SubHeader subHeader : subHeader_Number.keySet()) {
+			header.add(subHeader.get_subHeader());
 		}
 	}
 }

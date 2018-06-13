@@ -1,6 +1,5 @@
 package template.tool;
 
-
 import java.io.*;
 import java.util.*;
 import java.awt.Desktop;
@@ -13,13 +12,14 @@ import java.util.LinkedHashMap;
 import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JSplitPane;
+import javax.swing.JScrollPane;
 import javax.swing.JTree;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.event.TreeSElectionEvent;
+import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 
 public class SplitPane extends JFrame
@@ -38,11 +38,9 @@ public class SplitPane extends JFrame
 		Rendering_Shaders, Typography, Typography_Loading_Displaying, Typography_Attributes, Typography_Metrics, Math, 
 		Math_Operators, Math_BitwiseOperators, Math_Calculation, Math_Trigonometry, Math_Random, Constants;
 	
-	
 	JScrollPane leftScrollPane = new JScrollPane(tree);
 	JScrollPane rightScrollPane = new JScrollPane(editorPane);
 //	rightScrollPane.getviewport().add(editorPane);
-	JEditorPane editorPane;
 	HTMLEditorKit editorkit;
 	
 	JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftScrollPane, rightScrollPane);
@@ -88,14 +86,14 @@ public class SplitPane extends JFrame
 					continue;
 				} else {
 //					newheader.set_numberofSubHeaders(Integer.parseInt(line));
-					LinkedHashMap<SubHeader, int> tempHashMap = new LinkedHashMap();
+					LinkedHashMap<SubHeader, Integer> tempHashMap = new LinkedHashMap();
 					for(int i = 0; i < Integer.parseInt(line); i++) {
 						// get line for subheader 
 						line = br.readLine();
 						SubHeader tempSubHeader = new SubHeader(line);
 						// get line for number of subheader references
-						number = Integer.parseInt(br.readLine());
-						tempHashMap.put(line, number);
+						Integer number = Integer.parseInt(br.readLine());
+						tempHashMap.put(tempSubHeader, number);
 					}
 					newheader.set_subHeader_Number(tempHashMap);
 				}
@@ -113,19 +111,20 @@ public class SplitPane extends JFrame
 				for(int i = 0; i < listofHeaders.size(); i++) {
 					Header tempHeader = listofHeaders.get(i);
 					if(tempHeader.get_misc() != 0) {
-						for(int i = 0; i < tempHeader.get_misc(); i++) {
+						for(int j = 0; j < tempHeader.get_misc(); j++) {
 							line = br.readLine();
 							tempHeader.add_miscLeaves(line);
 						}
 					}
 					
-					if(tempHeader.get_subHeader_Number.size() != 0) {
-						for(Map.Entry<SubHeader, int> entry : map.entrySet()) {
+					
+					if(tempHeader.get_numberofSubHeaders()!= 0) {
+						for(Map.Entry<SubHeader, Integer> entry : tempHeader.get_subHeader_Number().entrySet()) {
 							SubHeader temp = entry.getKey();
 							int tempNum = entry.getValue();
-							for(int i = 0; i < tempNum; i++) {
+							for(int j = 0; j < tempNum; j++) {
 								line = br.readLine();
-								temp.add_leaf(line)
+								temp.add_leaf(line);
 							}
 						}
 					}
@@ -314,9 +313,8 @@ public class SplitPane extends JFrame
 		if (node == null) 
 			return;
 		
-		Object 
 		if(node.isLeaf()) {
-			if
+			
 		}
 	}
 }

@@ -1,4 +1,4 @@
-import template.tool;
+package template.tool;
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.io.*;
 import java.util.*;
@@ -22,6 +22,10 @@ public class SubHeader {
 		for(int i = 0; i < leaves.size(); i++) {
 			subHeader.add(leaves.get(i));
 		}
+	}
+	
+	public DefaultMutableTreeNode get_subHeader() {
+		return subHeader;
 	}
 
 }

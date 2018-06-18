@@ -14,18 +14,29 @@ public class SubHeader {
 //		subHeader = new DefaultMutableTreeNode(subheaderInput);
 //	}
 	
-	public void add_leaf(String leafInput) {
-		leaves.add(new DefaultMutableTreeNode(leafInput));
-	}
-	
-	public void addLeaftosubHeader() {
-		for(int i = 0; i < leaves.size(); i++) {
-			subHeader.add(leaves.get(i));
+//	public void add_leaf(String leafInput) {
+//		DefaultMutableTreeNode inputleaf = new DefaultMutableTreeNode(leafInput);
+//		leaves.add(inputleaf);
+//		subHeader.add(inputleaf);
+//	}
+//	
+	public void add_leaf(ArrayList<DefaultMutableTreeNode> inputlist) {
+//		System.out.println("adding these leaves");
+//		System.out.println(inputlist);
+		for(DefaultMutableTreeNode leafinput : inputlist) {
+			leaves.add(leafinput);
 		}
+		for(DefaultMutableTreeNode leafinput : leaves) {
+			subHeader.add(leafinput);
+		}
+		System.out.println(leaves);
 	}
-	
 	public DefaultMutableTreeNode get_subHeader() {
 		return subHeader;
+	}
+	
+	public ArrayList<DefaultMutableTreeNode> get_leaves() {
+		return leaves;
 	}
 
 }

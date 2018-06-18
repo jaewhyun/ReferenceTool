@@ -57,4 +57,8 @@ public class Header {
 			header.add(subHeader.get_subHeader());
 		}
 	}
+	
+	public ArrayList<DefaultMutableTreeNode> get_miscLeaves() {
+		return miscLeaves;
+	}
 }

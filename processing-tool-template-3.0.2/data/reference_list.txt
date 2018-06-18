@@ -311,7 +311,6 @@ PShader
 resetShader()
 shader()
 PFont
-Loading & Displaying
 createFont()
 loadFont()
 text()

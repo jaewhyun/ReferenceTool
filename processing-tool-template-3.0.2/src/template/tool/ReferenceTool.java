@@ -53,10 +53,9 @@ public class ReferenceTool implements Tool {
     // Get the currently active Editor to run the Tool on it
     Editor editor = base.getActiveEditor();
     SplitPane newpane = new SplitPane();
-    newpane.setTree();
 
     // Fill in author.name, author.url, tool.prettyVersion and
     // project.prettyName in build.properties for them to be auto-replaced here.
-    System.out.println("Hello Tool. ##tool.name## ##tool.prettyVersion## by ##author##");
+    System.out.println("Reference Tool 1.0.0 by Jae Hyun");
   }
 }

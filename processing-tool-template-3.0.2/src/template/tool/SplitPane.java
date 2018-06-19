@@ -20,6 +20,7 @@ import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeSelectionModel;
 
 import processing.app.exec.SystemOutSiphon;
 
@@ -28,81 +29,72 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 
 public class SplitPane extends JFrame {
-//						implements TreeSelectionListener {
-	List<Header> listofHeaders = new ArrayList();
-	
+	List<Header> listofHeaders = new ArrayList<Header>();
 	DefaultTreeModel treeModel;
-	JTree tree;
 	JEditorPane editorPane = new JEditorPane();
 	DefaultMutableTreeNode Root;
-	
-	JScrollPane leftScrollPane = new JScrollPane(tree);
-	JScrollPane rightScrollPane = new JScrollPane(editorPane);
-//	rightScrollPane.getviewport().add(editorPane);
+	JTree tree;
 	HTMLEditorKit editorkit;
-	ArrayList<String> referenceList = new ArrayList();
-	
+	JScrollPane leftscrollPane;
+	JScrollPane rightscrollPane;
+	ArrayList<String> referenceList = new ArrayList<String>();
 
 	public SplitPane() {
-		setSize(600, 400);
-		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftScrollPane, rightScrollPane);
-		editorPane.setEditable(false);
-		add(splitPane);
-		setVisible(true);
-		editorkit = new HTMLEditorKit();
-		editorkit.setAutoFormSubmission(false);
-		editorPane.setEditorKit(editorkit);
-		
-		editorPane.addHyperlinkListener(new HyperlinkListener() {
-			@Override
-			public void hyperlinkUpdate(HyperlinkEvent e) {
-				if(e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-					handleLink(e.getURL().toExternalForm());
-				}
-			}
-		});
 		Root = new DefaultMutableTreeNode("");
 		setTree();
 		treeModel = new DefaultTreeModel(Root);
 		tree = new JTree(treeModel);
 		tree.setRootVisible(false);
-		splitPane.setDividerLocation(160);
+		tree.getSelectionModel().addTreeSelectionListener(new Selector());
+		tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+		
+		leftscrollPane = new JScrollPane(tree);
+		rightscrollPane = new JScrollPane(editorPane);
+		
+		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+		splitPane.setLeftComponent(leftscrollPane);
+		splitPane.setRightComponent(rightscrollPane);
+		
+		splitPane.setDividerLocation(200);
+		
+		editorPane.setEditable(false);
+		editorkit = new HTMLEditorKit();
+//		editorkit.setAutoFormSubmission(false);
+//		editorPane.setEditorKit(editorkit);
+		
+//		editorPane.addHyperlinkListener(new HyperlinkListener() {
+//			@Override
+//			public void hyperlinkUpdate(HyperlinkEvent e) {
+//				if(e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+//					handleLink(e.getURL().toExternalForm());
+//				}
+//			}
+//		});
+		splitPane.setPreferredSize(new Dimension(600,400));
+		this.getContentPane().add(splitPane);
 	}
 	
 	public void readinLists() {
-//		System.out.println("here2");
 		java.net.URL htmlURL = getClass().getResource("/data/reference_summary.txt");
-//		System.out.println(htmlURL);
 				
 		try (BufferedReader br = new BufferedReader(new InputStreamReader(htmlURL.openStream()))){
 			String line;
 			while((line = br.readLine()) != null) {
-//				System.out.println(line);
-				// add header to root
 				Header newheader = new Header(line);
 				Root.add(newheader.get_header());
-				//get line for the number of misc references
 				line = br.readLine();
-//				System.out.println(line);
 				newheader.set_misc(Integer.parseInt(line));
-				// get line for the number of subheaders
 				line = br.readLine();
-//				System.out.println("number of subheaders are: "+line);
 				Integer num_subHeader = Integer.parseInt(line);
 				
 				if(num_subHeader != 0) {
 					newheader.set_numberofSubHeaders(num_subHeader);
-					LinkedHashMap<SubHeader, Integer> tempHashMap = new LinkedHashMap();
+					LinkedHashMap<SubHeader, Integer> tempHashMap = new LinkedHashMap<SubHeader, Integer>();
 					for(int i = 0; i < num_subHeader; i++) {
-//						System.out.println("i is:"+i);
-						// get line for subheader 
 						line = br.readLine();
-//						System.out.println("Subheader is: "+ line);
 						SubHeader tempSubHeader = new SubHeader(line);
-						// get line for number of subheader references
 						line = br.readLine();
 						Integer number = Integer.parseInt(line);
-//						System.out.println("number of references under it is: " +line);
 						tempHashMap.put(tempSubHeader, number);
 					}
 					newheader.set_subHeader_Number(tempHashMap);
@@ -114,10 +106,6 @@ public class SplitPane extends JFrame {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
-		
-		
-		System.out.println("finishedreading");
 	}
 	
 	public void printheaders() {
@@ -158,7 +146,6 @@ public class SplitPane extends JFrame {
 			String line;
 			while((line = br.readLine()) != null) {
 				referenceList.add(line);
-//				System.out.println(line);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -176,16 +163,13 @@ public class SplitPane extends JFrame {
 				for(int j = counter; j < tempHeaderMiscNum + counter; j++) {
 					// add misc references
 					tempHeader.add_miscLeaves(referenceList.get(j));
-//					System.out.println("walalalala");
 				}
 			}
 			
 			counter += tempHeaderMiscNum;
-			System.out.println(tempHeader.get_numberofSubHeaders());
 			
 			// check for subheaders and if number of subheaders is not 0
 			if(tempHeader.get_numberofSubHeaders()!=0) {
-				System.out.println("subheader is not 0");
 				// per subhead
 				for(Map.Entry<SubHeader, Integer> entry : tempSubHeaders.entrySet()) {
 					SubHeader tempSubHead = entry.getKey();
@@ -197,7 +181,6 @@ public class SplitPane extends JFrame {
 						inputList.add(new DefaultMutableTreeNode(tempString));
 					}
 					
-					System.out.println("adding leaves");
 					tempSubHead.add_leaf(inputList);
 					counter += tempSubHeadNum;
 				}
@@ -206,7 +189,6 @@ public class SplitPane extends JFrame {
 	}
 	
 	public void setTree() {
-		System.out.println("here");
 		readinLists();
 		assignReferences();
 		printheaders();
@@ -240,13 +222,23 @@ public class SplitPane extends JFrame {
 	
 //	@Override
 //	public void valueChanged(TreeSelectionEvent e) {
-//		DefaultMutableTreeNode node = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
-//				
-//		if (node == null) 
-//			return;
 //		
-//		if(node.isLeaf()) {
-//			
-//		}
 //	}
+	private class Selector implements TreeSelectionListener {
+		public void valueChanged(TreeSelectionEvent e) {
+			DefaultMutableTreeNode node = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
+			
+			if (node == null) 
+				return;
+			
+			String nodeName = node.toString();
+			
+			if(node.isLeaf()) {
+				
+			}
+		}
+	}
 }
+
+
+

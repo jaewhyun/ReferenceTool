@@ -8,16 +8,12 @@ public class Header {
 	int misc = 0;
 	Integer numberofSubHeaders = 0;
 	ArrayList<DefaultMutableTreeNode> miscLeaves = new ArrayList<DefaultMutableTreeNode>();
-	LinkedHashMap<SubHeader, Integer> subHeader_Number = new LinkedHashMap();
+	LinkedHashMap<SubHeader, Integer> subHeader_Number = new LinkedHashMap<SubHeader, Integer>();
 	
 	public Header(String headerName) {
 		header = new DefaultMutableTreeNode(headerName);
 	}
 	
-//	public void set_headerName(String nameInput) {
-//		headerName = nameInput;
-//	}
-//	
 	public void set_misc(int numInput) {
 		misc = numInput;
 	}
@@ -26,7 +22,7 @@ public class Header {
 		numberofSubHeaders = numInput;
 	}
 //	
-	public void set_subHeader_Number(LinkedHashMap hashmapInput) {
+	public void set_subHeader_Number(LinkedHashMap<SubHeader, Integer> hashmapInput) {
 		subHeader_Number =  hashmapInput;
 	}
 	

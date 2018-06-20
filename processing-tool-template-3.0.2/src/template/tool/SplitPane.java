@@ -55,10 +55,12 @@ public class SplitPane extends JFrame {
 		splitPane.setLeftComponent(leftscrollPane);
 		splitPane.setRightComponent(rightscrollPane);
 		
-		splitPane.setDividerLocation(200);
-		
 		editorPane.setEditable(false);
 		editorkit = new HTMLEditorKit();
+		
+		splitPane.setDividerLocation(200);
+		
+		
 //		editorkit.setAutoFormSubmission(false);
 //		editorPane.setEditorKit(editorkit);
 		
@@ -109,26 +111,26 @@ public class SplitPane extends JFrame {
 	}
 	
 	public void printheaders() {
-//		System.out.println("list of headers in order are: ");
-//		for(Header currentH : listofHeaders) {
-//			System.out.println(currentH.get_header().toString());
-//			if(currentH.get_misc() != 0) {
-//				System.out.println("the misc are: ");
-//				for(DefaultMutableTreeNode cmiscleaf : currentH.get_miscLeaves()) {
-//					System.out.println(cmiscleaf.toString());
-//				}
-//			}
-//			for(Map.Entry<SubHeader, Integer> entry : currentH.get_subHeader_Number().entrySet()) {
-//				SubHeader temp = entry.getKey();
-//				System.out.println("subheader is: " + temp.get_subHeader().toString());
-//				ArrayList<DefaultMutableTreeNode> templeaves = temp.get_leaves();
-//				System.out.println("leaves are: ");
-//				System.out.println(templeaves);
-//				for(DefaultMutableTreeNode templeaf : templeaves) {
-//					System.out.println(templeaf.toString());
-//				}
-//			}
-//		}
+		System.out.println("list of headers in order are: ");
+		for(Header currentH : listofHeaders) {
+			System.out.println(currentH.get_header().toString());
+			if(currentH.get_misc() != 0) {
+				System.out.println("the misc are: ");
+				for(DefaultMutableTreeNode cmiscleaf : currentH.get_miscLeaves()) {
+					System.out.println(cmiscleaf.toString());
+				}
+			}
+			for(Map.Entry<SubHeader, Integer> entry : currentH.get_subHeader_Number().entrySet()) {
+				SubHeader temp = entry.getKey();
+				System.out.println("subheader is: " + temp.get_subHeader().toString());
+				ArrayList<DefaultMutableTreeNode> templeaves = temp.get_leaves();
+				System.out.println("leaves are: ");
+				System.out.println(templeaves);
+				for(DefaultMutableTreeNode templeaf : templeaves) {
+					System.out.println(templeaf.toString());
+				}
+			}
+		}
 		
 		Enumeration e = Root.preorderEnumeration();
 		while(e.hasMoreElements()) {
@@ -224,6 +226,11 @@ public class SplitPane extends JFrame {
 //	public void valueChanged(TreeSelectionEvent e) {
 //		
 //	}
+//	public String createFileName(String nodename) {
+//		nodename = nodename.replaceAll("[^a-zA-Z0-9_]", "");
+//		return nodename;
+//	}
+	
 	private class Selector implements TreeSelectionListener {
 		public void valueChanged(TreeSelectionEvent e) {
 			DefaultMutableTreeNode node = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
@@ -232,10 +239,33 @@ public class SplitPane extends JFrame {
 				return;
 			
 			String nodeName = node.toString();
+			String htmlfileName = null;
 			
 			if(node.isLeaf()) {
+				String lasttwo = nodeName.substring(nodeName.length()-2);
 				
+				if(nodeName.indexOf('_') >= 0) {
+					htmlfileName = "/data/reference/"+nodeName+".html";
+					System.out.println(htmlfileName);
+				} else if(lasttwo.equals("()")) {
+					nodeName = nodeName.replaceAll("[()]", "");
+					nodeName = nodeName + "_";
+					htmlfileName = "/data/reference/"+nodeName+".html";
+					System.out.println(htmlfileName);
+				} else {
+					nodeName = nodeName.replaceAll("[^a-zA-Z0-9_]", "");
+					nodeName = nodeName.replaceAll("\\s+", "");
+					htmlfileName = "/data/reference/"+nodeName+".html";
+					System.out.println(htmlfileName);
+				}
+				java.net.URL htmlURL = getClass().getResource(htmlfileName);
+				setFile(htmlURL);
+			} else {
+				java.net.URL htmlURL = getClass().getResource("/data/reference/referencetool.html");
+				setFile(htmlURL);
 			}
+			
+
 		}
 	}
 }

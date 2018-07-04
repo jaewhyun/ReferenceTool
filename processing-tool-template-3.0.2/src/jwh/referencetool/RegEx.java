@@ -6,7 +6,7 @@ import java.util.*;
 import java.io.*;
 import java.net.URL;
 
-class RegEx {
+public class RegEx {
 	String theWholeThing = "";
 	String description ="";
 	String examples = "";
@@ -14,11 +14,11 @@ class RegEx {
 	String returns = "";
 	String syntax = "";
 	
-	ArrayList<String> syntax = ArrayList<String>();
-	ArrayList<String> parameterNames = ArrayList<String>();
-	ArrayList<String> parameterDescs = ArrayList<String>();
-	ArrayList<String> exampleImages = ArrayList<String>();
-	ArrayList<String> exampleCode = ArrayList<String>();
+	ArrayList<String> syntaxlist = new ArrayList<String>();
+	ArrayList<String> parameterNames = new ArrayList<String>();
+	ArrayList<String> parameterDescs = new ArrayList<String>();
+	ArrayList<String> exampleImages = new ArrayList<String>();
+	ArrayList<String> exampleCode = new ArrayList<String>();
 	
 	private String readHTML(URL htmlName) throws IOException {
 		BufferedReader in = new BufferedReader(new InputStreamReader(htmlName.openStream()));
@@ -38,10 +38,14 @@ class RegEx {
 		}
 	}
 	
-	public RegeEx(URL htmlName) {
-		theWholeThing = readHTML(htmlName);
-		String[] tokens = split(theWholeThing,  "<!-- ==================================== CONTENT - Headers ============================ -->");
-		tokens = split(tokens[1], "<!-- ==================================== FOOTER ============================ -->");
+	public RegEx(URL htmlName) {
+		try {
+			theWholeThing = readHTML(htmlName);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		String[] tokens = theWholeThing.split("<!-- ==================================== CONTENT - Headers ============================ -->");
+		tokens = tokens[1].split("<!-- ==================================== FOOTER ============================ -->");
 		String theWholeThing = tokens[0];
 	}
 	
@@ -71,8 +75,8 @@ class RegEx {
 				exampleImages.add(matcher.group(1));
 			}
 			
-			pattern = Pattern.comiple("<pre >(.+?(?=</pre>))|<pre class=\"margin\">(.+?(?=</pre>))");
-			matcher = pattern.matcher(exampleBlock);
+			pattern = Pattern.compile("<pre >(.+?(?=</pre>))|<pre class=\"margin\">(.+?(?=</pre>))");
+			matcher = pattern.matcher(examplesBlock);
 			
 			while(matcher.find()) {
 				exampleCode.add(matcher.group(1));
@@ -96,7 +100,7 @@ class RegEx {
 		
 		if(matcher.find()) {
 			syntax = matcher.group(1);
-			println(syntax);
+			System.out.println(syntax);
 		}
 	}
 	

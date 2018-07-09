@@ -59,15 +59,13 @@ public class RegEx {
 	
 	public void parseExamples() {
 		//parse out entire block
-		Pattern pattern = Pattern.compile("<th scope=\"row\">Examples</th><td>(.+?(?=</td>))");
+		Pattern pattern = Pattern.compile("<tr class=\"\"><th scope=\"row\">Examples</th><td>([\\S\\s]+?(?=</td>))");
 		Matcher matcher = pattern.matcher(theWholeThing);
 		
 		if(matcher.find()) {
 			String examplesBlock = matcher.group(1);
 			
 			// parse out individual examples
-			//"<div class=\"example\"><img src=(.+?(?=alt=\"example pic\" />))"
-//			pattern = Pattern.compile("(?:<div class=\"example\"><(.+?(?=<alt=\"example pic\" \/>))<pre class=\"margin\">(.+?(?=/pre>))</pre>)");
 			pattern = Pattern.compile("<div class=\"example\"><img src=(.+?(?=alt=\"example pic\" />))");
 			matcher = pattern.matcher(examplesBlock);
 			
@@ -75,7 +73,7 @@ public class RegEx {
 				exampleImages.add(matcher.group(1));
 			}
 			
-			pattern = Pattern.compile("<pre >(.+?(?=</pre>))|<pre class=\"margin\">(.+?(?=</pre>))");
+			pattern = Pattern.compile("<pre.*>\\n*\\s*(.+?(?=\\n*</pre>))");
 			matcher = pattern.matcher(examplesBlock);
 			
 			while(matcher.find()) {
@@ -86,7 +84,7 @@ public class RegEx {
 	}
 	
 	public void parseDescription() {
-		Pattern pattern = Pattern.compile("<th scope=\"row\">Description</th>\\s*<td>(.+?(?=</td>))");
+		Pattern pattern = Pattern.compile("<tr class=\"\">\\n*\\s*<th scope=\"row\">Description</th>\\n*\\s*<td>\\n*\\s*([\\S\\s]+?(?=\\n*</tr>))");
 		Matcher matcher = pattern.matcher(theWholeThing);
 		
 		if(matcher.find()) {
@@ -95,13 +93,32 @@ public class RegEx {
 	}
 	
 	public void parseSyntax() {
-		Pattern pattern = Pattern.compile("<th scope=\"row\">Syntax</th><td><pre>(.+?(?=</pre>))");
+		Pattern pattern = Pattern.compile("<th scope=\"row\">Syntax</th><td><pre>([\\S\\s]+?(?=</pre>))");
 		Matcher matcher = pattern.matcher(theWholeThing);
 		
 		if(matcher.find()) {
 			syntax = matcher.group(1);
+			syntaxlist.add(syntax);
 			System.out.println(syntax);
 		}
 	}
+	
+	public void parseParameters() {
+		Pattern pattern = Pattern.compile("<th scope=\"row\">Parameters</th><td><table cellpadding=\"0\" cellspacing=\"0\" border=\"0\">([\\S\\s]+?(?=</table>))");
+		Matcher matcher = pattern.matcher(theWholeThing);
+		
+		if(matcher.find()) {
+			String paramsBlock = matcher.group(1);
+			pattern = Pattern.compile("(?:<th scope=\"row\" class=\"code\">(.+?(?=</th>))</th>\\n*<td>(.+?(?=</td>))</td>)");
+			matcher = pattern.matcher(paramsBlock);
+			
+			while(matcher.find()) {
+				parameterNames.add(matcher.group(1));
+				parameterDescs.add(matcher.group(2));
+			}
+		}
+	}
+	
+	
 	
 }

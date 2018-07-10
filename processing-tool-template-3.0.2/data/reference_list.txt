@@ -63,24 +63,20 @@ int
 long
 Array
 ArrayList
-DoubleDict
-DoubleList
-FloatDict
-FloatList
+FloatDict`
+FloatList`
 HashMap
-IntDict
-IntList
-JSONArray
-JSONObject
-LongDict
-LongList
+IntDict`
+IntList`
+JSONArray`
+JSONObject`
 Object
-String
-StringDict
-StringList
-Table
-TableRow
-XML
+String`
+StringDict`
+StringList`
+Table`
+TableRow`
+XML`
 binary()
 boolean()
 byte()
@@ -131,7 +127,7 @@ switch
 || (logical OR)
 createShape()
 loadShape()
-PShape
+PShape`
 arc()
 ellipse()
 line()
@@ -184,7 +180,7 @@ keyPressed()
 keyPressed
 keyReleased()
 keyTyped()
-BufferedReader
+BufferedReader`
 createInput()
 createReader()
 launch()
@@ -217,7 +213,7 @@ createOutput()
 createWriter()
 endRaw()
 endRecord()
-PrintWriter
+PrintWriter`
 saveBytes()
 saveJSONArray()
 saveJSONObject()
@@ -283,7 +279,7 @@ lerpColor()
 red()
 saturation()
 createImage()
-PImage
+PImage`
 image()
 imageMode()
 loadImage()
@@ -305,12 +301,12 @@ blendMode()
 clip()
 createGraphics()
 noClip()
-PGraphics
+PGraphics`
 loadShader()
-PShader
+PShader`
 resetShader()
 shader()
-PFont
+PFont`
 createFont()
 loadFont()
 text()
@@ -322,7 +318,7 @@ textSize()
 textWidth()
 textAscent()
 textDescent()
-PVector
+PVector`
 % (modulo)
 * (multiply)
 *= (multiply assign)

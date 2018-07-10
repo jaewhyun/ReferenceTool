@@ -8,17 +8,15 @@ import java.net.URL;
 
 public class RegEx {
 	String theWholeThing = "";
-	String description ="";
-	String examples = "";
 	String name = "";
 	String returns = "";
-	String syntax = "";
 	
-	ArrayList<String> syntaxlist = new ArrayList<String>();
 	ArrayList<String> parameterNames = new ArrayList<String>();
 	ArrayList<String> parameterDescs = new ArrayList<String>();
 	ArrayList<String> exampleImages = new ArrayList<String>();
-	ArrayList<String> exampleCode = new ArrayList<String>();
+	ArrayList<String> exampleCodes = new ArrayList<String>();
+	ArrayList<String> descriptionList = new ArrayList<String>();
+	ArrayList<String> syntaxList = new ArrayList<String>();
 	
 	private String readHTML(URL htmlName) throws IOException {
 		BufferedReader in = new BufferedReader(new InputStreamReader(htmlName.openStream()));
@@ -49,17 +47,19 @@ public class RegEx {
 		String theWholeThing = tokens[0];
 	}
 	
-	public void parseName() {
+	public String parseName() {
 		Pattern pattern = Pattern.compile("<th scope=\"row\">Name</th>\\s*<td><h3>(.+?(?=</h3>))");
 		Matcher matcher = pattern.matcher(theWholeThing);
 		if(matcher.find()) {
 			name = matcher.group(1);
 		}
+		
+		return name;
 	}
 	
 	public void parseExamples() {
 		//parse out entire block
-		Pattern pattern = Pattern.compile("<tr class=\"\"><th scope=\"row\">Examples</th><td>([\\S\\s]+?(?=</td>))");
+		Pattern pattern = Pattern.compile("<tr class=\"\"><th scope=\"row\">Examples</th><td>([\S\s]+?(?=</td>))");
 		Matcher matcher = pattern.matcher(theWholeThing);
 		
 		if(matcher.find()) {
@@ -73,34 +73,51 @@ public class RegEx {
 				exampleImages.add(matcher.group(1));
 			}
 			
-			pattern = Pattern.compile("<pre.*>\\n*\\s*(.+?(?=\\n*</pre>))");
+			pattern = Pattern.compile("<pre.+?>\\n([\S\s]+?(?=</pre>))");
 			matcher = pattern.matcher(examplesBlock);
 			
 			while(matcher.find()) {
-				exampleCode.add(matcher.group(1));
-				String examplecode = matcher.group(1);
+				exampleCodes.add(matcher.group(1));
 			}
 		}
 	}
 	
-	public void parseDescription() {
-		Pattern pattern = Pattern.compile("<tr class=\"\">\\n*\\s*<th scope=\"row\">Description</th>\\n*\\s*<td>\\n*\\s*([\\S\\s]+?(?=\\n*</tr>))");
+	public ArrayList<String> get_exampleImages() {
+		return exampleImages;
+	}
+	
+	public ArrayList<String> get_exampleCodes() {
+		return exampleCodes;
+	}
+	
+	public ArrayList<String> parseDescription() {
+		Pattern pattern = Pattern.compile("<tr class=\"\">\\n*\\s*<th scope=\"row\">Description</th>\\n*\\s*<td>\\n*\\s*([\S\s]+?(?=\\n*</tr>))");
 		Matcher matcher = pattern.matcher(theWholeThing);
+		String description = "";
 		
 		if(matcher.find()) {
 			description = matcher.group(1);
 		}
+		
+		pattern = Pattern.compile("(.+?(?=<br */>)|.+?(?=\\n*</td>))");
+		matcher = pattern.matcher(description);
+		
+		if(matcher.find()) {
+			descriptionList.add(matcher.group(1));
+		}
+		
+		return descriptionList;
 	}
 	
-	public void parseSyntax() {
-		Pattern pattern = Pattern.compile("<th scope=\"row\">Syntax</th><td><pre>([\\S\\s]+?(?=</pre>))");
+	public ArrayList<String> parseSyntax() {
+		Pattern pattern = Pattern.compile("<th scope=\"row\">Syntax</th><td><pre>([\S\s]+?(?=</pre>))");
 		Matcher matcher = pattern.matcher(theWholeThing);
 		
 		if(matcher.find()) {
-			syntax = matcher.group(1);
-			syntaxlist.add(syntax);
-			System.out.println(syntax);
+			syntaxList.add(matcher.group(1));
 		}
+		
+		return syntaxList;
 	}
 	
 	public void parseParameters() {
@@ -119,6 +136,23 @@ public class RegEx {
 		}
 	}
 	
+	public String parseReturns() {
+		Pattern pattern = Pattern.compile("<th scope=\"row\">Returns</td><td class=\"code\">(.+?(?=</td>))");
+		matcher matcher = pattern.matcher(theWholeThing);
+		
+		if(matcher.find()) {
+			returns = matcher.group(1);
+		}
+		
+		return returns;
+	}
 	
+	public ArrayList<String> get_parameterNames() {
+		return parameterNames;
+	}
+	
+	public ArrayList<String> get_parameterDescs() {
+		return parameterDescs;
+	}
 	
 }

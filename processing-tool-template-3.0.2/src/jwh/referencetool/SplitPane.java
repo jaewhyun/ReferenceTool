@@ -39,10 +39,11 @@ import javax.swing.event.TreeSelectionListener;
 public class SplitPane extends JFrame {
 	List<Header> listofHeaders = new ArrayList<Header>();
 	DefaultTreeModel treeModel;
-	JEditorPane editorPane = new JEditorPane();
+//	JEditorPane editorPane = new JEditorPane();
+	setHTML htmlPane = new setHTML();
 	DefaultMutableTreeNode Root;
 	JTree tree;
-	HTMLEditorKit editorkit;
+//	HTMLEditorKit editorkit;
 	JScrollPane leftscrollPane;
 	JScrollPane rightscrollPane;
 	ArrayList<String> referenceList = new ArrayList<String>();
@@ -81,28 +82,42 @@ public class SplitPane extends JFrame {
 		renderer.setOpenIcon(null);
 		
 		leftscrollPane = new JScrollPane(tree);
-		rightscrollPane = new JScrollPane(editorPane);
+//		rightscrollPane = new JScrollPane(editorPane);
+		rightscrollPane = new JScrollPane(htmlPane);
 		
 		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 		splitPane.setLeftComponent(leftscrollPane);
 		splitPane.setRightComponent(rightscrollPane);
 		
-		editorPane.setEditable(false);
-		editorkit = new HTMLEditorKit();
+//		editorPane.setEditable(false);
+		htmlPane.setEditable(false);
+		
+//		editorkit = new HTMLEditorKit();
 		
 		splitPane.setDividerLocation(200);
 		
-		editorkit.setAutoFormSubmission(false);
-		editorPane.setEditorKit(editorkit);
+//		editorkit.setAutoFormSubmission(false);
+//		editorPane.setEditorKit(editorkit);
+//		htmlPane.setEditorKit(editorkit);
 		
-		editorPane.addHyperlinkListener(new HyperlinkListener() {
+//		editorPane.addHyperlinkListener(new HyperlinkListener() {
+//			@Override
+//			public void hyperlinkUpdate(HyperlinkEvent e) {
+//				if(e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+//					handleLink(e.getURL().toExternalForm());
+//				}
+//			}
+//		});
+		
+		htmlPane.addHyperlinkListener(new HyperlinkListener() {
 			@Override
 			public void hyperlinkUpdate(HyperlinkEvent e) {
 				if(e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-					handleLink(e.getURL().toExternalForm());
-				}
+				handleLink(e.getURL().toExternalForm());
+					}
 			}
 		});
+		
 		splitPane.setPreferredSize(new Dimension(700,400));
 		this.getContentPane().add(splitPane);
 	}
@@ -312,7 +327,8 @@ public class SplitPane extends JFrame {
 
 	public void setFile(URL urllink) {
 		try {
-			editorPane.setPage(urllink);
+			htmlPane.setPage(urllink);
+//			editorPane.setPage(urllink);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

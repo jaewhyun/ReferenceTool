@@ -10,7 +10,7 @@ Data
 Primitive
 8
 Composite
-20
+16
 Conversion
 10
 String Functions

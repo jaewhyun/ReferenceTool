@@ -326,12 +326,14 @@ public class SplitPane extends JFrame {
 	
 
 	public void setFile(URL urllink) {
-		try {
-			htmlPane.setPage(urllink);
-//			editorPane.setPage(urllink);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		htmlPane.parseHTML(urllink);
+//		try {
+//			
+////			htmlPane.setPage(urllink);
+////			editorPane.setPage(urllink);
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
 		
 	}
 	

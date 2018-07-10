@@ -10,25 +10,25 @@ import java.util.*;
 
 public class setHTML extends JEditorPane {
 	HTMLEditorKit editorkit;
-	SytleSheet css = new StyleSheet();
+	StyleSheet css = new StyleSheet();
 	String name = "";
 	String returns = "";
 	
 	ArrayList<String> syntaxList = new ArrayList<String>();
 	ArrayList<String> descriptionList = new ArrayList<String>();
 	ArrayList<String> parameterNames = new ArrayList<String>();
-	ArrayList<String> paramterDescs = new ArrayList<String>();
+	ArrayList<String> parameterDescs = new ArrayList<String>();
 	ArrayList<String> exampleImages = new ArrayList<String>();
 	ArrayList<String> exampleCodes = new ArrayList<String>();
 	
 	public setHTML() {
 		// not sure how this is used just yet
-		setContentType("text/html");
+		this.setContentType("text/html");
 		editorkit = new HTMLEditorKit();
 		css = editorkit.getStyleSheet();
 		setCSS();
 		editorkit.setAutoFormSubmission(false);
-		setEditorKit(editorkit);
+		this.setEditorKit(editorkit);
 	}
 	
 	public void setCSS() {
@@ -43,26 +43,26 @@ public class setHTML extends JEditorPane {
 		name = regexer.parseName();
 		regexer.parseExamples();
 		exampleImages = regexer.get_exampleImages();
-		exampleCodes = regexer.get_exampleCode();
+		exampleCodes = regexer.get_exampleCodes();
 		descriptionList = regexer.parseDescription();
 		regexer.parseParameters();
 		parameterNames = regexer.get_parameterNames();
-		parameterDescs = regexer.get_paramterDescs();
+		parameterDescs = regexer.get_parameterDescs();
 		syntaxList = regexer.parseSyntax();
 		returns = regexer.parseReturns();
 	}
 	
-	public fillIn(String name, ArrayList<String> syntaxList, ArrayList<String> descriptionList, ArrayList<String> parameterNames, 
+	public void fillIn(String name, ArrayList<String> syntaxList, ArrayList<String> descriptionList, ArrayList<String> parameterNames, 
 		ArrayList<String> parameterDescs, ArrayList<String> exampleImages, ArrayList<String> exampleCodes) {
 		
 		setText("<table>"
-				+ "<tr valign= 'top'>"+
-				+ "<td class='widthStyle'>Name</td>"
+				+ "<tr valign= \"top\">"
+				+ "<td class=\"widthStyle\">Name</td>"
 				+ "<td><b>" + name + "</b></td>"
 				+ "</tr>" 
-				+ "</table>" +
-				+ "<table class='sectionStyle'>" 
-				+ "<tr class='sectionheaderStyle'>Examples</td>"
+				+ "</table>"
+				+ "<table class=\"sectionStyle\">" 
+				+ "<tr class=\"sectionheaderStyle\">Examples</td>"
 				);
 		
 		

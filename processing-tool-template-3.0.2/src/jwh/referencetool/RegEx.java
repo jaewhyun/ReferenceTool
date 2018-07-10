@@ -59,7 +59,7 @@ public class RegEx {
 	
 	public void parseExamples() {
 		//parse out entire block
-		Pattern pattern = Pattern.compile("<tr class=\"\"><th scope=\"row\">Examples</th><td>([\S\s]+?(?=</td>))");
+		Pattern pattern = Pattern.compile("<tr class=\"\"><th scope=\"row\">Examples</th><td>([\\S\\s]+?(?=</td>))");
 		Matcher matcher = pattern.matcher(theWholeThing);
 		
 		if(matcher.find()) {
@@ -73,7 +73,7 @@ public class RegEx {
 				exampleImages.add(matcher.group(1));
 			}
 			
-			pattern = Pattern.compile("<pre.+?>\\n([\S\s]+?(?=</pre>))");
+			pattern = Pattern.compile("<pre.+?>\\n([\\S\\s]+?(?=</pre>))");
 			matcher = pattern.matcher(examplesBlock);
 			
 			while(matcher.find()) {
@@ -91,7 +91,7 @@ public class RegEx {
 	}
 	
 	public ArrayList<String> parseDescription() {
-		Pattern pattern = Pattern.compile("<tr class=\"\">\\n*\\s*<th scope=\"row\">Description</th>\\n*\\s*<td>\\n*\\s*([\S\s]+?(?=\\n*</tr>))");
+		Pattern pattern = Pattern.compile("<tr class=\"\">\\n*\\s*<th scope=\"row\">Description</th>\\n*\\s*<td>\\n*\\s*([\\S\\s]+?(?=\\n*</tr>))");
 		Matcher matcher = pattern.matcher(theWholeThing);
 		String description = "";
 		
@@ -110,7 +110,7 @@ public class RegEx {
 	}
 	
 	public ArrayList<String> parseSyntax() {
-		Pattern pattern = Pattern.compile("<th scope=\"row\">Syntax</th><td><pre>([\S\s]+?(?=</pre>))");
+		Pattern pattern = Pattern.compile("<th scope=\"row\">Syntax</th><td><pre>([\\S\\s]+?(?=</pre>))");
 		Matcher matcher = pattern.matcher(theWholeThing);
 		
 		if(matcher.find()) {
@@ -138,7 +138,7 @@ public class RegEx {
 	
 	public String parseReturns() {
 		Pattern pattern = Pattern.compile("<th scope=\"row\">Returns</td><td class=\"code\">(.+?(?=</td>))");
-		matcher matcher = pattern.matcher(theWholeThing);
+		Matcher matcher = pattern.matcher(theWholeThing);
 		
 		if(matcher.find()) {
 			returns = matcher.group(1);

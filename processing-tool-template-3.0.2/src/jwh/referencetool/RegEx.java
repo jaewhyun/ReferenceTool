@@ -69,7 +69,9 @@ public class RegEx {
 			matcher = pattern.matcher(examplesBlock);
 			
 			while(matcher.find()) {
-				exampleImages.add(matcher.group(1));
+				String imageName = matcher.group(1);
+				imageName = imageName.replaceAll("\"", "");
+				exampleImages.add(imageName);
 			}
 			
 			pattern = Pattern.compile("<pre.+?>\\n([\\S\\s]+?(?=</pre>))");
@@ -77,7 +79,7 @@ public class RegEx {
 			
 			while(matcher.find()) {
 				exampleCodes.add(matcher.group(1));
-//				System.out.println(matcher.group(1));
+//				//System.out.println(matcher.group(1));
 			}
 		}
 	}
@@ -99,7 +101,7 @@ public class RegEx {
 			description = matcher.group(1);
 		}
 		
-//		System.out.println(description);
+//		//System.out.println(description);
 		return description;
 	}
 	
@@ -113,7 +115,7 @@ public class RegEx {
 			syntax = matcher.group(1);
 		}
 		
-		System.out.println(syntax);
+		//System.out.println(syntax);
 		return syntax;
 	}
 	

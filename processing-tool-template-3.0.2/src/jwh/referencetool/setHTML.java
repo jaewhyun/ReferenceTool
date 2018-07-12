@@ -118,7 +118,8 @@ public class setHTML extends JEditorPane {
 		}
 
 		finalexampleString = finalexampleString + "</table>";
-//		System.out.println(finalexampleString);
+		System.out.println(finalexampleString);
+		System.out.println("\\n");
 		return finalexampleString;
 	}
 	
@@ -127,16 +128,17 @@ public class setHTML extends JEditorPane {
 		
 		descriptionstring = descriptionstring + description + "</td></tr><table>";
 		
+		System.out.println(descriptionstring);
 		return descriptionstring;
 	}
 	
 	public String syntaxString() {
-		String syntaxstring = "<table class=\"sectionStyle\"><tr valign=\"top\"><td class=\"widthStyle\"><u>Syntax</u></td>";
+		String syntaxstring = "<table class=\"sectionStyle\"><tr valign=\"top\"><td class=\"widthStyle\"><u>Syntax</u></td><pre >";
 		
 		if(!syntax.equals("")) {
 			syntax = syntax.trim().replaceAll("\\n", "<br>");
 			
-			syntaxstring = syntaxstring + syntax + "</td></tr></table>";
+			syntaxstring = syntaxstring + syntax + "</pre></td></tr></table>";
 	
 		} else {
 			syntaxstring = "";
@@ -152,7 +154,7 @@ public class setHTML extends JEditorPane {
 			for(int i = 0; i < parameterNames.size(); i++) {
 				String addon = "";
 				if(i > 0) {
-					addon = "<tr class=\"widthStyle\">&nbsp;</td>";
+					addon = "<td class=\"widthStyle\">&nbsp;</td>";
 				}
 				
 				String name = parameterNames.get(i);
@@ -163,8 +165,9 @@ public class setHTML extends JEditorPane {
 			}
 		}
 		
-		finalparamstring = finalparamstring + "</table>";
+		finalparamstring = parameterstring + finalparamstring + "</table>";
 		
+		System.out.println(finalparamstring);
 		return finalparamstring;
 	}
 	

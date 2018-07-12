@@ -92,22 +92,8 @@ public class SplitPane extends JFrame {
 //		editorPane.setEditable(false);
 		htmlPane.setEditable(false);
 		
-//		editorkit = new HTMLEditorKit();
-		
 		splitPane.setDividerLocation(200);
-		
-//		editorkit.setAutoFormSubmission(false);
-//		editorPane.setEditorKit(editorkit);
-//		htmlPane.setEditorKit(editorkit);
-		
-//		editorPane.addHyperlinkListener(new HyperlinkListener() {
-//			@Override
-//			public void hyperlinkUpdate(HyperlinkEvent e) {
-//				if(e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-//					handleLink(e.getURL().toExternalForm());
-//				}
-//			}
-//		});
+
 		
 		htmlPane.addHyperlinkListener(new HyperlinkListener() {
 			@Override

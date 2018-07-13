@@ -4,6 +4,10 @@ import java.io.*;
 import java.util.*;
 import java.awt.BorderLayout;
 import java.awt.Desktop;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.URI;
@@ -14,17 +18,14 @@ import java.util.LinkedHashMap;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontFormatException;
-import java.awt.GraphicsDevice;
-import java.awt.GraphicsEnvironment;
-import java.awt.GraphicsConfiguration;
-import javax.swing.JEditorPane;
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 import javax.swing.JSplitPane;
+import javax.swing.JTextField;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
-import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeSelectionModel;
 import javax.swing.tree.TreeNode;
@@ -39,32 +40,18 @@ import javax.swing.event.TreeSelectionListener;
 public class SplitPane extends JFrame {
 	List<Header> listofHeaders = new ArrayList<Header>();
 	DefaultTreeModel treeModel;
-//	JEditorPane editorPane = new JEditorPane();
+
 	setHTML htmlPane = new setHTML();
 	DefaultMutableTreeNode Root;
 	JTree tree;
-//	HTMLEditorKit editorkit;
+	Boolean filtered = false;
+	JTextField searchBar;
 	JScrollPane leftscrollPane;
 	JScrollPane rightscrollPane;
 	ArrayList<String> referenceList = new ArrayList<String>();
 	ArrayList<Leaf> trackLeaves = new ArrayList<Leaf>();
 
 	public SplitPane() {
-		
-//		File fontfile;
-//		try {
-//			fontfile = new File(getClass().getResource("/data/Raleway-Regular.tff").toURI());
-//		} catch(URISyntaxException e) {
-//			e.printStackTrace();
-//		}
-//		
-//		try {
-//			GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-//			ge.registerFont(Font.createFont(Font.TRUETYPE_FONT, fontfile));
-//		} catch(FontFormatException f | IOExcpetion) {
-//			f.printStackTrace();
-//		}
-//		
 		Root = new DefaultMutableTreeNode("References");
 		setTree();
 		treeModel = new DefaultTreeModel(Root);
@@ -81,28 +68,32 @@ public class SplitPane extends JFrame {
 		renderer.setClosedIcon(null);
 		renderer.setOpenIcon(null);
 		
+		JPanel leftpanel = new JPanel();
+		leftpanel.setLayout(new BorderLayout());
+		searchBar = new JTextField("Search");
+		searchBar.addFocusListener(new SelectFocus());
+		
+		searchBar.addKeyListener(new KeyAdapter() {
+			public void keyTyped(KeyEvent ke) {
+				super.keyTyped(ke);
+				filterTree(searchBar.getText()+ke.getKeyChar());
+			}
+		});
+		
 		leftscrollPane = new JScrollPane(tree);
-//		rightscrollPane = new JScrollPane(editorPane);
 		rightscrollPane = new JScrollPane(htmlPane);
 		
+		leftpanel.add(searchBar, BorderLayout.NORTH);
+		leftpanel.add(leftscrollPane, BorderLayout.CENTER);
+		
 		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-		splitPane.setLeftComponent(leftscrollPane);
+//		splitPane.setLeftComponent(leftscrollPane);
+		splitPane.setLeftComponent(leftpanel);
 		splitPane.setRightComponent(rightscrollPane);
 		
-//		editorPane.setEditable(false);
 		htmlPane.setEditable(false);
 		
 		splitPane.setDividerLocation(200);
-
-		
-		htmlPane.addHyperlinkListener(new HyperlinkListener() {
-			@Override
-			public void hyperlinkUpdate(HyperlinkEvent e) {
-				if(e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-				handleLink(e.getURL().toExternalForm());
-					}
-			}
-		});
 		
 		splitPane.setPreferredSize(new Dimension(700,400));
 		this.getContentPane().add(splitPane);
@@ -142,37 +133,17 @@ public class SplitPane extends JFrame {
 		}
 	}
 	
-	public void printheaders() {
-//		System.out.println("list of headers in order are: ");
-//		for(Header currentH : listofHeaders) {
-//			System.out.println(currentH.get_header().toString());
-//			if(currentH.get_misc() != 0) {
-//				System.out.println("the misc are: ");
-//				for(DefaultMutableTreeNode cmiscleaf : currentH.get_miscLeaves()) {
-//					System.out.println(cmiscleaf.toString());
-//				}
-//			}
-//			for(Map.Entry<SubHeader, Integer> entry : currentH.get_subHeader_Number().entrySet()) {
-//				SubHeader temp = entry.getKey();
-//				System.out.println("subheader is: " + temp.get_subHeader().toString());
-//				ArrayList<DefaultMutableTreeNode> templeaves = temp.get_leaves();
-//				System.out.println("leaves are: ");
-//				System.out.println(templeaves);
-//				for(DefaultMutableTreeNode templeaf : templeaves) {
-//					System.out.println(templeaf.toString());
-//				}
-//			}
+//	public void printheaders() {
+//
+//		Enumeration e = Root.preorderEnumeration();
+//		while(e.hasMoreElements()) {
+//			System.out.println(e.nextElement());
 //		}
-//		
-		Enumeration e = Root.preorderEnumeration();
-		while(e.hasMoreElements()) {
-			System.out.println(e.nextElement());
-		}
-	}
-	
+//	}
+//	
 	public void assignReferences() {
 		java.net.URL htmlURL = getClass().getResource("/data/reference_list.txt");
-		System.out.println(htmlURL);
+//		System.out.println(htmlURL);
 		
 		int counter = 0;
 		
@@ -185,7 +156,6 @@ public class SplitPane extends JFrame {
 			e.printStackTrace();
 		}
 		
-		System.out.println("finishedreading2");
 		for(int i = 0; i < listofHeaders.size(); i++) {
 			// per header
 			Header tempHeader = listofHeaders.get(i);
@@ -233,7 +203,7 @@ public class SplitPane extends JFrame {
 	
 	public void assignleafMiscs() {
 		java.net.URL htmlURL = getClass().getResource("/data/leafmiscs.txt");
-		System.out.println(htmlURL);
+//		System.out.println(htmlURL);
 		ArrayList<String> listofmiscs = new ArrayList<String>();
 		
 		int counter = 0;
@@ -243,13 +213,13 @@ public class SplitPane extends JFrame {
 			String[] output;
 			
 			int count = 0;
-			System.out.println("reading in miscs");
+//			System.out.println("reading in miscs");
 			while((line = br.readLine()) != null) {
 				if(line.indexOf('_') >= 0) {
 					output = line.split("_");
 					for(Leaf currentleaf : trackLeaves) {
 						String currentleafName = currentleaf.get_leaf().toString();
-						System.out.println(currentleaf);
+//						System.out.println(currentleaf);
 						if(currentleafName.equals(output[0])) {
 							if(output[1].indexOf(',') == -1) {
 								Integer numberofMethods = Integer.parseInt(output[1]);
@@ -258,18 +228,17 @@ public class SplitPane extends JFrame {
 								for(int i = 0; i < numberofMethods; i++) {
 									line = br.readLine();
 									DefaultMutableTreeNode newnode = new DefaultMutableTreeNode(line);
-									System.out.println(newnode.toString());
+//									System.out.println(newnode.toString());
 									methods.add(newnode);
 								}
 								
 								currentleaf.add_leafMethods(methods);
 							} else {
-								System.out.println("found method and number");
 								String[] parsed = output[1].split(",");
 								Integer numberofFields = Integer.parseInt(parsed[0]);
-								System.out.println(numberofFields);
+//								System.out.println(numberofFields);
 								Integer numberofMethods = Integer.parseInt(parsed[1]);
-								System.out.println(numberofMethods);
+//								System.out.println(numberofMethods);
 								
 								ArrayList<DefaultMutableTreeNode> methods = new ArrayList<DefaultMutableTreeNode>();
 								ArrayList<DefaultMutableTreeNode> fields = new ArrayList<DefaultMutableTreeNode>();
@@ -277,14 +246,14 @@ public class SplitPane extends JFrame {
 								for(int i = 0; i < numberofFields; i++) {
 									line = br.readLine();
 									DefaultMutableTreeNode newnode = new DefaultMutableTreeNode(line);
-									System.out.println(newnode.toString());
+//									System.out.println(newnode.toString());
 									fields.add(newnode);
 								}
 								
 								for(int i = 0; i < numberofMethods; i++) {
 									line = br.readLine();
 									DefaultMutableTreeNode newnode = new DefaultMutableTreeNode(line);
-									System.out.println(newnode.toString());
+//									System.out.println(newnode.toString());
 									methods.add(newnode);
 								}
 								
@@ -313,30 +282,68 @@ public class SplitPane extends JFrame {
 
 	public void setFile(URL urllink) {
 		htmlPane.parseHTML(urllink);
-//		try {
-//			
-////			htmlPane.setPage(urllink);
-////			editorPane.setPage(urllink);
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
-		
-	}
-	
-	public void handleLink(String link){
-		try {
-			openthislink(link);
-		} catch(Exception e) {
-			 e.printStackTrace();
-		}
-	}
-	
-	public void openthislink(String url) throws Exception {
-		Desktop.getDesktop().browse(new URI(url));
 	}
 	
 	public void handleClose() {
 		dispose();
+	}
+	
+	/**
+	 * Tree widget which allows the tree to be filtered on keystroke time. Only nodes who's
+	 * toString matches the search field will remain in the tree or its parents.
+	 *
+	 * Copyright (c) Oliver.Watkins
+	 */
+	/**
+	 *
+	 * @param text
+	 */
+	
+	public void filterTree(String text) {
+		String filteredText = text;
+		DefaultMutableTreeNode filteredRoot = copyNode(Root);
+		
+		if(text.trim().toString().equals("")) {
+			treeModel.setRoot(Root);
+			tree.setModel(treeModel);
+			tree.updateUI();
+			leftscrollPane.getViewport().setView(tree);
+			
+			for(int i = 0; i< tree.getRowCount();i++) {
+				tree.expandRow(i);
+			}
+			
+			return;
+		} else {
+			TreeNodeBuilder b = new TreeNodeBuilder(text);
+			filteredRoot = b.prune((DefaultMutableTreeNode) filteredRoot.getRoot());
+			
+			treeModel.setRoot(filteredRoot);
+			
+			tree.setModel(treeModel);
+			tree.updateUI();
+			leftscrollPane.getViewport().setView(tree);	
+
+		}
+		
+		for(int i = 0; i<tree.getRowCount(); i++) {
+			tree.expandRow(i);
+		}
+	
+		filtered = true;
+	}
+	
+	private DefaultMutableTreeNode copyNode(DefaultMutableTreeNode orig) {
+		DefaultMutableTreeNode newOne = new DefaultMutableTreeNode();
+		newOne.setUserObject(orig.getUserObject());
+		Enumeration enm = orig.children();
+		
+		while(enm.hasMoreElements()) {
+			DefaultMutableTreeNode child = (DefaultMutableTreeNode) enm.nextElement();
+			newOne.add(copyNode(child));
+		}
+		
+		return newOne;
 	}
 	
 	
@@ -354,15 +361,15 @@ public class SplitPane extends JFrame {
 			
 			if(node.isLeaf()) {
 				DefaultMutableTreeNode nodeParent = (DefaultMutableTreeNode) node.getParent();
-				System.out.println(nodeParent.toString());
+//				System.out.println(nodeParent.toString());
 				DefaultMutableTreeNode nodeGParent = (DefaultMutableTreeNode) nodeParent.getParent();
-				System.out.println(nodeGParent.toString());
+//				System.out.println(nodeGParent.toString());
 				if(nodeParent.toString().equals("Methods") || nodeParent.toString().equals("Fields")) {
 					String nodeGParentName = nodeGParent.toString();
 					nodeName = nodeGParentName+"_"+nodeName;
 				} 
 				
-				System.out.println(nodeName);
+//				System.out.println(nodeName);
 				
 				String lasttwo = nodeName.substring(nodeName.length()-2);
 				
@@ -370,15 +377,15 @@ public class SplitPane extends JFrame {
 					nodeName = nodeName.replaceAll("[()]", "");
 					nodeName = nodeName + "_";
 					htmlfileName = "/data/reference/"+nodeName+".html";
-					System.out.println(htmlfileName);
+//					System.out.println(htmlfileName);
 				} else if(nodeName.indexOf('_') >= 0) {
 					htmlfileName = "/data/reference/"+nodeName+".html";
-					System.out.println(htmlfileName);
+//					System.out.println(htmlfileName);
 				} else {
 					nodeName = nodeName.replaceAll("[^a-zA-Z0-9_]", "");
 					nodeName = nodeName.replaceAll("\\s+", "");
 					htmlfileName = "/data/reference/"+nodeName+".html";
-					System.out.println(htmlfileName);
+//					System.out.println(htmlfileName);
 				}
 				
 				java.net.URL htmlURL = getClass().getResource(htmlfileName);
@@ -397,6 +404,25 @@ public class SplitPane extends JFrame {
 					setFile(htmlURL);
 				}
 			}
+		}
+	}
+	
+	private class SelectFocus extends FocusAdapter {
+		public void focusGained(FocusEvent evt) {
+			searchBar.setText("");
+		}
+		
+		public void focusLost(FocusEvent evt) {
+			searchBar.setText("Search");
+			collapseAll(tree);
+		}
+	}
+	
+	public void collapseAll(JTree tree) {
+		int row = tree.getRowCount() - 1;
+		while(row >= 0) {
+			tree.collapseRow(row);
+			row--;
 		}
 	}
 }

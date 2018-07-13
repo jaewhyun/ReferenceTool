@@ -136,7 +136,7 @@ public class RegEx {
 	}
 	
 	public String parseReturns() {
-		Pattern pattern = Pattern.compile("<th scope=\"row\">Returns</td><td class=\"code\">(.+?(?=</td>))");
+		Pattern pattern = Pattern.compile("<th scope=\"row\">Returns</th><td class=\"code\">(.+?(?=</td>))");
 		Matcher matcher = pattern.matcher(theWholeThing);
 		
 		if(matcher.find()) {

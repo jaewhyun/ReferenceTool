@@ -1,12 +1,16 @@
 package jwh.referencetool;
 
 import javax.swing.JEditorPane;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.StyleSheet;
 
 import processing.app.Platform;
 
+import java.awt.Desktop;
 import java.io.*;
+import java.net.URI;
 import java.net.URL;
 import java.util.*;
 
@@ -31,6 +35,14 @@ public class setHTML extends JEditorPane {
 		setCSS();
 		editorkit.setAutoFormSubmission(false);
 		this.setEditorKit(editorkit);
+		this.addHyperlinkListener(new HyperlinkListener() {
+			@Override
+			public void hyperlinkUpdate(HyperlinkEvent e) {
+				if(e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+				handleLink(e.getURL().toExternalForm());
+					}
+			}
+		});
 	}
 	
 	public void setCSS() {
@@ -77,7 +89,7 @@ public class setHTML extends JEditorPane {
 				+ "</table>";
 		
 		String total = namestring + finalexampleString + descriptionString + syntaxString + parameterString + returnString;
-//		//System.out.println(total);
+		System.out.println(total);
 		this.setText(total);
 	}
 	
@@ -187,9 +199,23 @@ public class setHTML extends JEditorPane {
 	public String returnString() {
 		String returnstring = "";
 		if(!returns.equals("")) {
-			returnstring = "<table class=\"sectionStyle\"><tr valign=\"top\"><td class=\"widthStyle\"><u><Returns</u></td><td>"+returns+"</td></tr></table>";
+			returnstring = "<table class=\"sectionStyle\"><tr valign=\"top\"><td class=\"widthStyle\"><u>Returns</u></td><td>"+returns+"</td></tr></table>";
 		}
+		
+		System.out.println(returnstring);
 
 		return returnstring;
+	}
+	
+	public void handleLink(String link){
+		try {
+			openthislink(link);
+		} catch(Exception e) {
+			 e.printStackTrace();
+		}
+	}
+	
+	public void openthislink(String url) throws Exception {
+		Desktop.getDesktop().browse(new URI(url));
 	}
 }

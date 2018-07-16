@@ -78,7 +78,9 @@ public class RegEx {
 			matcher = pattern.matcher(examplesBlock);
 			
 			while(matcher.find()) {
+				String codeExample = matcher.group(1);
 				exampleCodes.add(matcher.group(1));
+				
 //				//System.out.println(matcher.group(1));
 			}
 		}

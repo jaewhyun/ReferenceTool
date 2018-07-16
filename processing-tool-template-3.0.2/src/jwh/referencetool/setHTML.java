@@ -89,7 +89,7 @@ public class setHTML extends JEditorPane {
 				+ "</table>";
 		
 		String total = namestring + finalexampleString + descriptionString + syntaxString + parameterString + returnString;
-		System.out.println(total);
+//		System.out.println(total);
 		this.setText(total);
 	}
 	
@@ -116,12 +116,31 @@ public class setHTML extends JEditorPane {
 					imageLocation = "<td><img src="+testString+"></td>";
 //					//System.out.println(imageLocation);
 					
-					System.out.println(imageLocation);
-					System.out.println(imagefile.getAbsolutePath());
+//					System.out.println(imageLocation);
+//					System.out.println(imagefile.getAbsolutePath());
 				}
 				
 				String code = "";
-				code = exampleCodes.get(i).trim().replaceAll("\\n", "<br>");
+//				code = exampleCodes.get(i).trim().replaceAll("\\n", "<br>");
+				String returnCode = "";
+				returnCode = exampleCodes.get(i).trim();
+				
+				String codeLines[] = returnCode.split("\\r?\\n");
+				for(int j = 0; j < codeLines.length; j++) {
+					if(codeLines[j].contains("//")) {
+						codeLines[j] = codeLines[j].replaceAll("//", "<span style=\"color: #3d9a3e\">//");
+						codeLines[j] = codeLines[j] + "</span>";
+					} else {
+						codeLines[j] = "<span style=\"color: #192cff\">" + codeLines[j];
+						codeLines[j] = codeLines[j] + "</span>";
+					}
+					
+					code = code + codeLines[j] + "<br>";
+				}
+				
+				System.out.println(code);
+
+//				code = code.replaceAll("//", "<span style=\"color: #3d9a3e\">//");
 				
 				code = "<td><pre >"+ code + "</pre></td></tr>";
 				
@@ -202,7 +221,7 @@ public class setHTML extends JEditorPane {
 			returnstring = "<table class=\"sectionStyle\"><tr valign=\"top\"><td class=\"widthStyle\"><u>Returns</u></td><td>"+returns+"</td></tr></table>";
 		}
 		
-		System.out.println(returnstring);
+//		System.out.println(returnstring);
 
 		return returnstring;
 	}

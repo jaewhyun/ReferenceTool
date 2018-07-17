@@ -108,12 +108,12 @@ public class setHTML extends JEditorPane {
 				
 				String imageLocation = "";
 				if(exampleImages.size() != 0) {
-					imageLocation = exampleImages.get(i);
+					imageLocation = exampleImages.get(i).trim();
 					String testString = "modes/java/reference/"+imageLocation;
 					File imagefile = Platform.getContentFile(testString);
-					testString = imagefile.getAbsolutePath();
+					testString = imagefile.toURI().toString();
 //					imageLocation = new StringBuilder(imageLocation).insert(1, "../").toString();
-					imageLocation = "<td><img src="+testString+"></td>";
+					imageLocation = "<td><img src=\""+testString+"\"></td>";
 //					//System.out.println(imageLocation);
 					
 //					System.out.println(imageLocation);

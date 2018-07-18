@@ -13,6 +13,8 @@ import java.io.*;
 import java.net.URI;
 import java.net.URL;
 import java.util.*;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 public class setHTML extends JEditorPane {
 	HTMLEditorKit editorkit;
@@ -112,27 +114,42 @@ public class setHTML extends JEditorPane {
 					String testString = "modes/java/reference/"+imageLocation;
 					File imagefile = Platform.getContentFile(testString);
 					testString = imagefile.toURI().toString();
-//					imageLocation = new StringBuilder(imageLocation).insert(1, "../").toString();
-					imageLocation = "<td><img src=\""+testString+"\"></td>";
-//					//System.out.println(imageLocation);
-					
-//					System.out.println(imageLocation);
-//					System.out.println(imagefile.getAbsolutePath());
+					imageLocation = "<td><img src=\""+testString+"\"></td><td width = 10px>&nbsp;</td>";
 				}
 				
 				String code = "";
-//				code = exampleCodes.get(i).trim().replaceAll("\\n", "<br>");
 				String returnCode = "";
 				returnCode = exampleCodes.get(i).trim();
 				
 				String codeLines[] = returnCode.split("\\r?\\n");
 				for(int j = 0; j < codeLines.length; j++) {
+					System.out.println(codeLines[j]);
 					if(codeLines[j].contains("//")) {
 						codeLines[j] = codeLines[j].replaceAll("//", "<span style=\"color: #3d9a3e\">//");
 						codeLines[j] = codeLines[j] + "</span>";
 					} else {
-						codeLines[j] = "<span style=\"color: #192cff\">" + codeLines[j];
-						codeLines[j] = codeLines[j] + "</span>";
+						if(codeLines[j].matches("([0-9]*)")) {
+							System.out.println("found number");
+							ArrayList<String> numbers = new ArrayList<String>();
+							Pattern pattern = Pattern.compile("([0-9]*)");
+							Matcher matcher = pattern.matcher(codeLines[j]);
+							
+							while(matcher.find()) {
+								System.out.println("here");
+								String numberFound = matcher.group(1);
+								numbers.add(matcher.group(1));
+								System.out.println(numberFound);
+							}
+							
+							for(int z = 0; z < numbers.size(); z++) {
+								String replaceNew = "<span style=\"color:#dfbf3a\">" + numbers.get(z) + "</span>";
+								codeLines[j] = codeLines[j].replace(numbers.get(z), replaceNew);
+								System.out.println(codeLines[j]);
+							}
+						}
+						
+//						codeLines[j] = "<span style=\"color: #192cff\">" + codeLines[j];
+//						codeLines[j] = codeLines[j] + "</span>";
 					}
 					
 					code = code + codeLines[j] + "<br>";
@@ -142,7 +159,7 @@ public class setHTML extends JEditorPane {
 
 //				code = code.replaceAll("//", "<span style=\"color: #3d9a3e\">//");
 				
-				code = "<td><pre >"+ code + "</pre></td></tr>";
+				code = "<td valign = \"top\"><pre >"+ code + "</pre></td></tr>";
 				
 				if(i < (exampleCodes.size()-1) && imageLocation.equals("")) {
 					code = code + hr;

@@ -13,12 +13,11 @@ public class Leaf {
 	
 	public Leaf(String leafInput) {
 		if(leafInput.indexOf('`') >= 0) {
-			System.out.println("found a leaf with misc");
 			methods = new DefaultMutableTreeNode("Methods");
 			fields = new DefaultMutableTreeNode("Fields");
 		
 			leafInput = leafInput.replace("`", "");
-			System.out.println(leafInput);
+//			System.out.println(leafInput);
 		} 
 		
 		leaf = new DefaultMutableTreeNode(leafInput);

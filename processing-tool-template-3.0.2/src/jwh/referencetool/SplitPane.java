@@ -20,6 +20,7 @@ import java.util.LinkedHashMap;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontFormatException;
+import java.awt.GraphicsEnvironment;
 import java.awt.GridBagConstraints;
 
 import javax.swing.JFrame;
@@ -45,7 +46,7 @@ import javax.swing.event.TreeSelectionListener;
 public class SplitPane extends JFrame {
 	List<Header> listofHeaders = new ArrayList<Header>();
 	DefaultTreeModel treeModel;
-
+	Font font;
 	setHTML htmlPane = new setHTML();
 	DefaultMutableTreeNode Root;
 	JTree tree;
@@ -65,6 +66,16 @@ public class SplitPane extends JFrame {
 	}
 	
 	private void setGUI() {
+		java.net.URL fontURL = getClass().getResource("/data/Raleway-Regular.ttf");
+		try {
+			font = Font.createFont(Font.TRUETYPE_FONT, fontURL.openStream());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+		ge.registerFont(font);
+		
 		Root = new DefaultMutableTreeNode("References");
 		setTree();
 		treeModel = new DefaultTreeModel(Root);
@@ -82,6 +93,7 @@ public class SplitPane extends JFrame {
 		renderer.setOpenIcon(null);
 		
 		JPanel leftpanel = new JPanel();
+		leftpanel.setFont(font);
 		leftpanel.setLayout(new BorderLayout());
 		
 		searchBar = new JTextField("Search");
@@ -102,7 +114,9 @@ public class SplitPane extends JFrame {
 		});
 		
 		leftscrollPane = new JScrollPane(tree);
+		leftscrollPane.setFont(font);
 		rightscrollPane = new JScrollPane(htmlPane);
+		rightscrollPane.setFont(font);
 		
 		leftpanel.add(searchBar, BorderLayout.PAGE_START);
 		leftpanel.add(reset, BorderLayout.PAGE_END);

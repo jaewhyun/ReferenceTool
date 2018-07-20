@@ -1,12 +1,15 @@
 package jwh.referencetool;
 
 import javax.swing.JEditorPane;
+import javax.swing.JButton;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
+import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.StyleSheet;
 
 import processing.app.Platform;
+import processing.app.ui.Editor;
 
 import java.awt.Desktop;
 import java.io.*;
@@ -23,20 +26,30 @@ public class setHTML extends JEditorPane {
 	String returns = "";
 	String description = "";
 	String syntax = "";
+	HTMLDocument doc;
 	
 	ArrayList<String> parameterNames = new ArrayList<String>();
 	ArrayList<String> parameterDescs = new ArrayList<String>();
 	ArrayList<String> exampleImages = new ArrayList<String>();
 	ArrayList<String> exampleCodes = new ArrayList<String>();
+	HashMap<String, String> savedHTML = new HashMap<String, String>();
 	
 	public setHTML() {
 		// not sure how this is used just yet
 		this.setContentType("text/html");
-		editorkit = new HTMLEditorKit();
+//		editorkit = new HTMLEditorKit();
+		editorkit = new PreWrapHTMLEditorKit();
 		css = editorkit.getStyleSheet();
 		setCSS();
 		editorkit.setAutoFormSubmission(false);
 		this.setEditorKit(editorkit);
+		doc = (HTMLDocument) this.getDocument();
+//		try {
+//			doc.setBase(new URL("http://www.google.com"));
+//		} catch(Exception e) {
+//			e.printStackTrace();
+//		}
+		
 		this.addHyperlinkListener(new HyperlinkListener() {
 			@Override
 			public void hyperlinkUpdate(HyperlinkEvent e) {
@@ -47,37 +60,50 @@ public class setHTML extends JEditorPane {
 		});
 	}
 	
+	
 	public void setCSS() {
+//		java.net.URL font = getClass().getResource("/data/Raleway-Regular.ttf");
+//		String fontString = font.toString();
+//		System.out.println(fontString);
+//		css.addRule("body {font-family:" + fontString + "; font-size:9px}");
 		css.addRule("body {font-family: raleway; font-size:9px}");
 		css.addRule(".sectionStyle {padding-top: 20px}");
 		css.addRule(".widthStyle {width : 70px}");
 		css.addRule(".sectionheaderStyle {width : 70px; valign: top}");
 	}
 	
-	public void parseHTML(URL urlLink) {
-		RegEx regexer = new RegEx(urlLink);
-		name = regexer.parseName();
-//		//System.out.println(name);
-		regexer.parseExamples();
-		exampleImages = regexer.get_exampleImages();
-//		//System.out.println(exampleImages);
-		exampleCodes = regexer.get_exampleCodes();
-//		//System.out.println(exampleCodes);
-		description = regexer.parseDescription();
-		regexer.parseParameters();
-		parameterNames = regexer.get_parameterNames();
-//		//System.out.println(parameterNames);
-		parameterDescs = regexer.get_parameterDescs();
-//		//System.out.println(parameterDescs);
-		syntax = regexer.parseSyntax();
-		returns = regexer.parseReturns();
-//		//System.out.println(returns);
-		
-		fillIn();
+	public void parseHTML(URL urlLink, String nodeName) {
+		if(savedHTML.containsKey(nodeName)) {
+			this.setText(savedHTML.get(nodeName));
+		} else {
+			RegEx regexer = new RegEx(urlLink);
+			name = regexer.parseName();
+
+			regexer.parseExamples();
+			exampleImages = regexer.get_exampleImages();
+
+			exampleCodes = regexer.get_exampleCodes();
+
+			description = regexer.parseDescription();
+			regexer.parseParameters();
+			parameterNames = regexer.get_parameterNames();
+
+			parameterDescs = regexer.get_parameterDescs();
+
+			syntax = regexer.parseSyntax();
+			returns = regexer.parseReturns();
+
+			
+			fillIn(urlLink, nodeName);
+		}
 	}
 	
-	public void fillIn() {
-		String finalexampleString = exampleString();
+	public ArrayList<String> get_exampleCodes() {
+		return exampleCodes;
+	}
+	
+	public void fillIn(URL urllink, String nodeName) {
+		String finalexampleString = exampleString(urllink);
 		String descriptionString = descriptionString();
 		String syntaxString = syntaxString();
 		String parameterString = parameterString();
@@ -92,14 +118,23 @@ public class setHTML extends JEditorPane {
 		
 		String total = namestring + finalexampleString + descriptionString + syntaxString + parameterString + returnString;
 //		System.out.println(total);
+		total = total.replace("<<", "&lt;&lt;");
+		total = total.replaceAll(" *< ", " &lt ");
+		total = total.replaceAll(" *<= ", " &lt;= ");
 		this.setText(total);
+		if(!savedHTML.containsKey(nodeName)) {
+			savedHTML.put(nodeName, total);
+		}
 	}
 	
-	public String exampleString() {
+	public String exampleString(URL urllink) {
 		String hr = "<tr valign=\"top\"><td class=\"widthStyle\">&nbsp;</td><td><hr></td></tr>";
 		String examples = "";
 		String finalexampleString = "<table class=\"sectionStyle\">" 
 				+ "<tr valign = \"top\"><td class=\"sectionheaderStyle\"><u>Examples</u></td>";
+		ArrayList<String> nomoreImagesCode = new ArrayList<String>();
+		boolean nomoreImages = false;
+		
 		if(exampleCodes.size() != 0) {
 			for(int i = 0; i < exampleCodes.size(); i++) {
 				String exampletr = "";
@@ -108,12 +143,16 @@ public class setHTML extends JEditorPane {
 					exampletr = "<tr valign=\"top\"><td class=\"widthStyle\">&nbsp;</td>";
 				}
 				
+				if(i >= exampleImages.size() && exampleImages.size() != 0)
+					nomoreImages = true;
+				
 				String imageLocation = "";
-				if(exampleImages.size() != 0) {
+				if(exampleImages.size() != 0 && nomoreImages == false) {
 					imageLocation = exampleImages.get(i).trim();
 					String testString = "modes/java/reference/"+imageLocation;
 					File imagefile = Platform.getContentFile(testString);
 					testString = imagefile.toURI().toString();
+//					System.out.println(testString);
 					imageLocation = "<td><img src=\""+testString+"\"></td><td width = 10px>&nbsp;</td>";
 				}
 				
@@ -124,62 +163,70 @@ public class setHTML extends JEditorPane {
 				String codeLines[] = returnCode.split("\\r?\\n");
 				for(int j = 0; j < codeLines.length; j++) {
 					System.out.println(codeLines[j]);
-					if(codeLines[j].contains("//")) {
-						codeLines[j] = codeLines[j].replaceAll("//", "<span style=\"color: #3d9a3e\">//");
-						codeLines[j] = codeLines[j] + "</span>";
-					} else {
-						if(codeLines[j].matches("([0-9]*)")) {
-							System.out.println("found number");
-							ArrayList<String> numbers = new ArrayList<String>();
-							Pattern pattern = Pattern.compile("([0-9]*)");
-							Matcher matcher = pattern.matcher(codeLines[j]);
-							
-							while(matcher.find()) {
-								System.out.println("here");
-								String numberFound = matcher.group(1);
-								numbers.add(matcher.group(1));
-								System.out.println(numberFound);
-							}
-							
-							for(int z = 0; z < numbers.size(); z++) {
-								String replaceNew = "<span style=\"color:#dfbf3a\">" + numbers.get(z) + "</span>";
-								codeLines[j] = codeLines[j].replace(numbers.get(z), replaceNew);
-								System.out.println(codeLines[j]);
-							}
+					if(codeLines[j].contains("//") 
+							&& !codeLines[j].contains("https://") 
+							&& !codeLines[j].contains("http://")) {
+						codeLines[j] = codeLines[j].replace("//", "<span style=\"color: #3d9a3e\">//");
+						if(codeLines[j].contains(";")) {
+							codeLines[j] = codeLines[j].replaceAll(";", ";</span>");
 						}
-						
-//						codeLines[j] = "<span style=\"color: #192cff\">" + codeLines[j];
-//						codeLines[j] = codeLines[j] + "</span>";
+						codeLines[j] = codeLines[j] + "</span>";
+					} 
+					
+					if(codeLines[j].contains("/*") || codeLines[j].contains("/**")) {
+						codeLines[j] = codeLines[j].replace("/*", "<span style=\"color: #3d9a3e\">/*");
+						if(codeLines[j].contains("\\*+\\/")) {
+							System.out.println("found the end of the comments");
+							codeLines[j] = codeLines[j].replace("\\*+\\/", "*/</span>");
+						}	
+						codeLines[j] = codeLines[j].replaceAll("(\\*+\\/)", "*/</span>");
 					}
 					
 					code = code + codeLines[j] + "<br>";
 				}
 				
-				System.out.println(code);
+//				System.out.println(code);
 
 //				code = code.replaceAll("//", "<span style=\"color: #3d9a3e\">//");
-				
 				code = "<td valign = \"top\"><pre >"+ code + "</pre></td></tr>";
-				
+				if(nomoreImages == true) {
+					nomoreImagesCode.add(exampletr + code);
+					code = "";
+				}
+			
 				if(i < (exampleCodes.size()-1) && imageLocation.equals("")) {
 					code = code + hr;
 				}
 //				//System.out.println(code);
 				
 				if(!imageLocation.equals("")) {
-					finalexampleString = finalexampleString + exampletr+imageLocation+code;
+					finalexampleString = finalexampleString + exampletr + imageLocation+code;
 				} else {
-					finalexampleString = finalexampleString + exampletr+code;
+					finalexampleString = finalexampleString + exampletr + code;
 				}
 			}
 			
-			finalexampleString = finalexampleString + "</table>";
+//			finalexampleString = finalexampleString + "</table>";
+			
+			if(nomoreImages == false) {
+				finalexampleString = finalexampleString + "</table>";
+			} else {
+				String allcode = "";
+				for(int i = 0; i < nomoreImagesCode.size(); i++) {
+					allcode = allcode + nomoreImagesCode.get(i);
+				}
+				
+				allcode = "<table padding-top=\"0\" margin=\"0\">" + allcode + "</table>";
+				
+				finalexampleString = finalexampleString + "</table>" + allcode;
+			}
+			
 		} else {
 			finalexampleString = "";
 		}
 
 		
-//		//System.out.println(finalexampleString);
+		System.out.println(finalexampleString);
 //		//System.out.println("\\n");
 		return finalexampleString;
 	}

@@ -14,6 +14,7 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.URI;
@@ -30,6 +31,7 @@ import java.awt.GridBagConstraints;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
@@ -41,6 +43,8 @@ import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
+import javax.swing.event.DocumentListener;
+import javax.swing.event.DocumentEvent;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeSelectionModel;
 import javax.swing.tree.TreeNode;
@@ -55,7 +59,7 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 
-public class SplitPane extends JFrame {
+public class SplitPane extends JFrame{
 	List<Header> listofHeaders = new ArrayList<Header>();
 	Editor editor;
 	DefaultTreeModel treeModel;
@@ -65,6 +69,7 @@ public class SplitPane extends JFrame {
 	JTree tree;
 	Boolean filtered = false;
 	JTextField searchBar;
+	JTextArea textArea = new JTextArea();
 	JButton reset;
 	JCheckBox searchAll;
 	boolean mustSearchAll = false;
@@ -124,6 +129,7 @@ public class SplitPane extends JFrame {
 		
 		searchBar = new JTextField("Search");
 		searchBar.addFocusListener(new SelectFocus());
+		textArea.getDocument().addDocumentListener(new DocListener());
 		reset = new JButton("RESET");
 		reset.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -140,12 +146,24 @@ public class SplitPane extends JFrame {
 			}
 		});
 		
-		searchBar.addKeyListener(new KeyAdapter() {
-			public void keyTyped(KeyEvent ke) {
-				super.keyTyped(ke);
-				filterTree(searchBar.getText()+ke.getKeyChar(), mustSearchAll);
+		searchBar.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				int selStart = textArea.getSelectionStart();
+				int selEnd = textArea.getSelectionEnd();
+				textArea.replaceRange(searchBar.getText(), selStart, selEnd);
+				searchBar.selectAll();
 			}
 		});
+		
+		searchBar.getDocument().addDocumentListener(new DocListener());
+		searchBar.getDocument().putProperty("term", "Search");
+				
+//		searchBar.addKeyListener(new KeyAdapter() {
+//			public void keyTyped(KeyEvent ke) {
+//				super.keyTyped(ke);
+//				filterTree(searchBar.getText()+ke.getKeyChar(), mustSearchAll);
+//			}
+//		});
 		
 		JPanel buttonCheckPane = new JPanel();
 		buttonCheckPane.setLayout(new BoxLayout(buttonCheckPane, BoxLayout.LINE_AXIS));
@@ -429,9 +447,9 @@ public class SplitPane extends JFrame {
 //			
 			leftscrollPane.getViewport().setView(tree);
 			
-			for(int i = 0; i< tree.getRowCount();i++) {
-				tree.expandRow(i);
-			}
+//			for(int i = 0; i< tree.getRowCount();i++) {
+//				tree.expandRow(i);
+//			}
 			
 			DefaultTreeCellRenderer renderer = (DefaultTreeCellRenderer) tree.getCellRenderer();
 			renderer.setLeafIcon(null);
@@ -539,19 +557,16 @@ public class SplitPane extends JFrame {
 		}
 	}
 	
-//	private class  implements ActionListener {
-//		public void actionPerformed(ActionEvent e) {
-//			
-//		}
-//	}
-	
 	private class SelectFocus extends FocusAdapter {
 		public void focusGained(FocusEvent evt) {
 			searchBar.setText("");
 		}
 		
 		public void focusLost(FocusEvent evt) {
-			searchBar.setText("Search");
+			if(searchBar.getText() == null) {
+				searchBar.setText("Search");
+				collapseAll(tree);
+			}
 		}
 	}
 	
@@ -568,6 +583,20 @@ public class SplitPane extends JFrame {
 		while(row >= 0) {
 			tree.collapseRow(row);
 			row--;
+		}
+	}
+
+	private class DocListener implements DocumentListener {
+		public void insertUpdate(DocumentEvent e) {
+			filterTree(searchBar.getText(), mustSearchAll);
+		}
+		
+		public void removeUpdate(DocumentEvent e) {
+			filterTree(searchBar.getText(), mustSearchAll);
+		}
+		
+		public void changedUpdate(DocumentEvent e) {
+			
 		}
 	}
 }

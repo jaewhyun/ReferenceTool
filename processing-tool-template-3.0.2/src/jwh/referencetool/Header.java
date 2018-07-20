@@ -48,12 +48,6 @@ public class Header {
 //		System.out.println("connecting nodes");
 		for(Leaf currentleaf : leaves) {
 			header.add(currentleaf.get_leaf());
-			
-//			DefaultMutableTreeNode treenode = currentleaf.get_leaf();
-//			Enumeration e = treenode.preorderEnumeration();
-//			while(e.hasMoreElements()) {
-//				System.out.println(e.nextElement());
-//			}
 		}
 	}
 	

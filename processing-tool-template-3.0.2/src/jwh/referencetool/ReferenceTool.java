@@ -52,7 +52,7 @@ public class ReferenceTool implements Tool {
   public void run() {
     // Get the currently active Editor to run the Tool on it
     Editor editor = base.getActiveEditor();
-    SplitPane newpane = new SplitPane();
+    SplitPane newpane = new SplitPane(editor);
     newpane.pack();
     newpane.setVisible(true);
 

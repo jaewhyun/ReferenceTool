@@ -80,6 +80,8 @@ public class SplitPane extends JFrame{
 	ArrayList<String> referenceList = new ArrayList<String>();
 	ArrayList<Leaf> trackLeaves = new ArrayList<Leaf>();
 	HashSet<String> header_subheaderNames = new HashSet<String>();
+	HashSet<String> header_subheaderNames_toUpper = new HashSet<String>();
+//	HashSet<String> clickableNodes = new HashSet<String>();
 	
 
 	public SplitPane(Editor editorInput) {
@@ -208,6 +210,7 @@ public class SplitPane extends JFrame{
 			while((line = br.readLine()) != null) {
 				Header newheader = new Header(line);
 				header_subheaderNames.add(line);
+				header_subheaderNames_toUpper.add(line.toUpperCase());
 				Root.add(newheader.get_header());
 				line = br.readLine();
 				newheader.set_misc(Integer.parseInt(line));
@@ -221,6 +224,7 @@ public class SplitPane extends JFrame{
 						line = br.readLine();
 						SubHeader tempSubHeader = new SubHeader(line);
 						header_subheaderNames.add(line);
+						header_subheaderNames_toUpper.add(line.toUpperCase());
 						line = br.readLine();
 						Integer number = Integer.parseInt(line);
 						tempHashMap.put(tempSubHeader, number);
@@ -319,6 +323,7 @@ public class SplitPane extends JFrame{
 					for(Leaf currentleaf : trackLeaves) {
 						String currentleafName = currentleaf.get_leaf().toString();
 						if(currentleafName.equals(output[0])) {
+//							clickableNodes.add(currentleafName.toUpperCase());
 							if(output[1].indexOf(',') == -1) {
 								Integer numberofMethods = Integer.parseInt(output[1]);
 								
@@ -458,7 +463,7 @@ public class SplitPane extends JFrame{
 			
 			return;
 		} else {
-			TreeNodeBuilder b = new TreeNodeBuilder(text);
+			TreeNodeBuilder b = new TreeNodeBuilder(text, header_subheaderNames_toUpper);
 			filteredRoot = b.prune((DefaultMutableTreeNode) filteredRoot.getRoot());
 			
 			treeModel.setRoot(filteredRoot);
@@ -542,10 +547,9 @@ public class SplitPane extends JFrame{
 				java.net.URL htmlURL = getClass().getResource(htmlfileName);
 				setFile(htmlURL, nodeName);
 			} else {
-				DefaultMutableTreeNode nodeParent = (DefaultMutableTreeNode) node.getParent();
-				DefaultMutableTreeNode nodeGParent = (DefaultMutableTreeNode) nodeParent.getParent();
-
-				if(!node.toString().equals("Methods") && !node.toString().equals("Fields")
+				if(!node.isRoot() 
+						&& !node.toString().equals("Methods") 
+						&& !node.toString().equals("Fields")
 						&& !header_subheaderNames.contains(node.toString())) {
 					nodeName = nodeName.replaceAll("[^a-zA-Z0-9_]", "");
 					nodeName = nodeName.replaceAll("\\s+", "");
@@ -600,6 +604,3 @@ public class SplitPane extends JFrame{
 		}
 	}
 }
-
-
-

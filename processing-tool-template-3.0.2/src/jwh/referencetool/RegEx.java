@@ -14,8 +14,11 @@ public class RegEx {
 	ArrayList<String> parameterDescs = new ArrayList<String>();
 	ArrayList<String> exampleImages = new ArrayList<String>();
 	ArrayList<String> exampleCodes = new ArrayList<String>();
+	ArrayList<String> related = new ArrayList<String>();
 	
 	private String readHTML(URL htmlName) throws IOException {
+		System.out.println("in readhtml");
+		System.out.println(htmlName.toString());
 		BufferedReader in = new BufferedReader(new InputStreamReader(htmlName.openStream()));
 		String line;
 		StringBuilder stringBuilder = new StringBuilder();
@@ -146,6 +149,23 @@ public class RegEx {
 		}
 		
 		return returns;
+	}
+	
+	public ArrayList<String> parseRelated() {
+		Pattern pattern = Pattern.compile("<th scope=\"row\">Related</th><td>([\\S\\s]+?(?=</td>))");
+		Matcher matcher = pattern.matcher(theWholeThing);
+		
+		if(matcher.find()) {
+			String relatedBlock = matcher.group(1);
+			pattern = Pattern.compile("<a class=\"code\" .+>(.+?(?=</a>))");
+			matcher = pattern.matcher(relatedBlock);
+			
+			while(matcher.find()) {
+				related.add(matcher.group(1));
+			}
+		}
+		
+		return related;
 	}
 	
 	public ArrayList<String> get_parameterNames() {

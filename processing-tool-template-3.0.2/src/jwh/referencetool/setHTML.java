@@ -27,11 +27,12 @@ public class setHTML extends JEditorPane {
 	String description = "";
 	String syntax = "";
 	HTMLDocument doc;
-	
+
 	ArrayList<String> parameterNames = new ArrayList<String>();
 	ArrayList<String> parameterDescs = new ArrayList<String>();
 	ArrayList<String> exampleImages = new ArrayList<String>();
 	ArrayList<String> exampleCodes = new ArrayList<String>();
+	ArrayList<String> related = new ArrayList<String>();
 	HashMap<String, String> savedHTML = new HashMap<String, String>();
 	
 	public setHTML() {
@@ -92,8 +93,9 @@ public class setHTML extends JEditorPane {
 
 			syntax = regexer.parseSyntax();
 			returns = regexer.parseReturns();
-
 			
+			related = regexer.parseRelated();
+
 			fillIn(urlLink, nodeName);
 		}
 	}
@@ -108,6 +110,7 @@ public class setHTML extends JEditorPane {
 		String syntaxString = syntaxString();
 		String parameterString = parameterString();
 		String returnString = returnString();
+		String relatedString = relatedString();
 		
 		String namestring = "<table>"
 				+ "<tr valign= \"top\">"
@@ -116,7 +119,7 @@ public class setHTML extends JEditorPane {
 				+ "</tr>" 
 				+ "</table>";
 		
-		String total = namestring + finalexampleString + descriptionString + syntaxString + parameterString + returnString;
+		String total = namestring + finalexampleString + descriptionString + syntaxString + parameterString + returnString + relatedString;
 //		System.out.println(total);
 		total = total.replace("<<", "&lt;&lt;");
 		total = total.replaceAll(" *< ", " &lt ");
@@ -288,6 +291,29 @@ public class setHTML extends JEditorPane {
 //		System.out.println(returnstring);
 
 		return returnstring;
+	}
+	
+	public String relatedString() {
+		String relatedstring = "<table class=\"sectionStyle\"><tr valign=\"top\"><td class=\"widthStyle\"><u>Related</u></td>";
+		String finalrelatedstring = "";
+		
+		if(related.size() != 0) {
+			for(int i = 0; i < related.size(); i++) {
+				String addon = "";
+				if(i > 0) {
+					addon = "<td class=\"widthStyle\">&nbsp;</td>";
+				}
+				
+				String relatedName = related.get(i);
+				relatedName = "<td class = \"widthStyle\">" + relatedName + "</td></tr>";
+				
+				finalrelatedstring = finalrelatedstring + addon + relatedName;
+			}
+			
+			finalrelatedstring = relatedstring + finalrelatedstring + "</table>";
+		}
+		
+		return finalrelatedstring;
 	}
 	
 	public void handleLink(String link){

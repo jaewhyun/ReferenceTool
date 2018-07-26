@@ -74,6 +74,7 @@ public class SplitPane extends JFrame{
 	JCheckBox searchAll;
 	boolean mustSearchAll = false;
 	boolean initiated = false;
+	boolean started = false;
 	JScrollPane leftscrollPane;
 	JScrollPane rightscrollPane;
 	JPanel rightpanel;
@@ -81,10 +82,7 @@ public class SplitPane extends JFrame{
 	ArrayList<String> referenceList = new ArrayList<String>();
 	ArrayList<Leaf> trackLeaves = new ArrayList<Leaf>();
 	HashSet<String> header_subheaderNames = new HashSet<String>();
-	HashSet<String> header_subheaderNames_toUpper = new HashSet<String>();
-//	HashSet<String> clickableNodes = new HashSet<String>();
 	
-
 	public SplitPane(Editor editorInput) {
 		this.setTitle("References");
 		editor = editorInput;
@@ -102,7 +100,6 @@ public class SplitPane extends JFrame{
 			e.printStackTrace();
 		}
 		
-//		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
 		ge.registerFont(font);
 		
@@ -126,7 +123,6 @@ public class SplitPane extends JFrame{
 		rightpanel = new JPanel();
 		  
 		leftpanel.setFont(font);
-//		leftpanel.setLayout(new BorderLayout());
 		leftpanel.setLayout(new BoxLayout(leftpanel, BoxLayout.Y_AXIS));
 		rightpanel.setLayout(new BorderLayout());
 		
@@ -139,15 +135,11 @@ public class SplitPane extends JFrame{
 				collapseAll(tree);
 				searchAll.setSelected(false);
 				mustSearchAll = false;
+				searchBar.setText("");
 			}
 		});
 		
 		searchAll = new JCheckBox("Search All");
-//		searchAll.addActionListener(new ActionListener() {
-//			public void actionPerformed(ActionEvent e) {
-//				mustSearchAll = true;
-//			}
-//		});
 		
 		searchBar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -161,16 +153,8 @@ public class SplitPane extends JFrame{
 		searchBar.getDocument().addDocumentListener(new DocListener());
 		searchBar.getDocument().putProperty("term", "Search");
 				
-//		searchBar.addKeyListener(new KeyAdapter() {
-//			public void keyTyped(KeyEvent ke) {
-//				super.keyTyped(ke);
-//				filterTree(searchBar.getText()+ke.getKeyChar(), mustSearchAll);
-//			}
-//		});
-		
 		JPanel buttonCheckPane = new JPanel();
 		buttonCheckPane.setLayout(new BoxLayout(buttonCheckPane, BoxLayout.LINE_AXIS));
-		// top left bottom right
 		buttonCheckPane.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 10));
 		buttonCheckPane.add(searchAll);
 		buttonCheckPane.add(Box.createRigidArea(new Dimension(20, 0)));
@@ -213,7 +197,6 @@ public class SplitPane extends JFrame{
 			while((line = br.readLine()) != null) {
 				Header newheader = new Header(line);
 				header_subheaderNames.add(line);
-				header_subheaderNames_toUpper.add(line.toUpperCase());
 				Root.add(newheader.get_header());
 				line = br.readLine();
 				newheader.set_misc(Integer.parseInt(line));
@@ -227,7 +210,6 @@ public class SplitPane extends JFrame{
 						line = br.readLine();
 						SubHeader tempSubHeader = new SubHeader(line);
 						header_subheaderNames.add(line);
-						header_subheaderNames_toUpper.add(line.toUpperCase());
 						line = br.readLine();
 						Integer number = Integer.parseInt(line);
 						tempHashMap.put(tempSubHeader, number);
@@ -243,14 +225,6 @@ public class SplitPane extends JFrame{
 		}
 	}
 	
-//	public void printheaders() {
-//
-//		Enumeration e = Root.preorderEnumeration();
-//		while(e.hasMoreElements()) {
-//			//System.out.println(e.nextElement());
-//		}
-//	}
-//	
 	private void assignReferences() {
 		java.net.URL htmlURL = getClass().getResource("/data/reference_list.txt");
 		int counter = 0;
@@ -444,7 +418,7 @@ public class SplitPane extends JFrame{
 	 * @param text
 	 */
 	
-	private void filterTree(String text, boolean searchAllSelected) {
+	private void filterTree(String text) {
 		String filteredText = text;
 		DefaultMutableTreeNode filteredRoot = copyNode(Root);
 		
@@ -463,8 +437,12 @@ public class SplitPane extends JFrame{
 			
 			return;
 		} else {
-			TreeNodeBuilder b = new TreeNodeBuilder(text, header_subheaderNames_toUpper);
-			filteredRoot = b.prune((DefaultMutableTreeNode) filteredRoot.getRoot());
+			HashMap<String, String> searchAllExamples = htmlPane.get_searchAllExamples();
+			HashMap<String, String> searchAllDescriptions = htmlPane.get_searchAllDescriptions();
+			HashMap<String, String> savedHTML = htmlPane.get_savedHTML();
+			
+			TreeNodeBuilder b = new TreeNodeBuilder(text, savedHTML, header_subheaderNames, searchAllExamples, searchAllDescriptions);
+			filteredRoot = b.prune((DefaultMutableTreeNode) filteredRoot.getRoot(), searchAll.isSelected());
 			
 			treeModel.setRoot(filteredRoot);
 			
@@ -509,7 +487,8 @@ public class SplitPane extends JFrame{
 			
 			String nodeName = "";
 			String htmlfileName = "";
-			nodeName = nodeNameGenerator(node);
+			NodeNameGenerator gen = new NodeNameGenerator(header_subheaderNames);
+			nodeName = gen.generator(node);
 			
 			if(node.isLeaf()) {
 				htmlfileName = "/data/reference/" + nodeName + ".html";
@@ -528,42 +507,42 @@ public class SplitPane extends JFrame{
 		}
 	}
 	
-	private String nodeNameGenerator(DefaultMutableTreeNode node) {
-		String nodeName = node.toString();
-		
-		if(node.isLeaf()) {
-			DefaultMutableTreeNode nodeParent = (DefaultMutableTreeNode) node.getParent();
-			DefaultMutableTreeNode nodeGParent = (DefaultMutableTreeNode) nodeParent.getParent();
-			
-			if(nodeParent.toString().equals("Methods") || nodeParent.toString().equals("Fields")) {
-				String nodeGParentName = nodeGParent.toString();
-				nodeName = nodeGParentName+"_"+nodeName;
-			}
-			
-			String lasttwo = nodeName.substring(nodeName.length() - 2);
-			
-			if(lasttwo.equals("()")) {
-				nodeName = nodeName.replaceAll("[()]", "");
-				nodeName = nodeName + "_";
-			} else if(nodeName.indexOf('_') >= 0) {
-				nodeName = nodeName.replaceAll("[^a-zA-Z0-9_]", "");
-			} else {
-				nodeName = nodeName.replaceAll("[^a-zA-Z0-9_]", "");
-				nodeName = nodeName.replaceAll("\\s+", "");
-			}
-			
-		} else {
-			if(!node.isRoot() 
-					&& !node.toString().equals("Methods") 
-					&& !node.toString().equals("Fields")
-					&& !header_subheaderNames.contains(node.toString())) {
-				nodeName = nodeName.replaceAll("[^a-zA-Z0-9_]", "");
-				nodeName = nodeName.replaceAll("\\s+", "");
-			}
-		}
-		
-		return nodeName;
-	}
+//	private String generator(DefaultMutableTreeNode node) {
+//		String nodeName = node.toString();
+//		
+//		if(node.isLeaf()) {
+//			DefaultMutableTreeNode nodeParent = (DefaultMutableTreeNode) node.getParent();
+//			DefaultMutableTreeNode nodeGParent = (DefaultMutableTreeNode) nodeParent.getParent();
+//			
+//			if(nodeParent.toString().equals("Methods") || nodeParent.toString().equals("Fields")) {
+//				String nodeGParentName = nodeGParent.toString();
+//				nodeName = nodeGParentName+"_"+nodeName;
+//			}
+//			
+//			String lasttwo = nodeName.substring(nodeName.length() - 2);
+//			
+//			if(lasttwo.equals("()")) {
+//				nodeName = nodeName.replaceAll("[()]", "");
+//				nodeName = nodeName + "_";
+//			} else if(nodeName.indexOf('_') >= 0) {
+//				nodeName = nodeName.replaceAll("[^a-zA-Z0-9_]", "");
+//			} else {
+//				nodeName = nodeName.replaceAll("[^a-zA-Z0-9_]", "");
+//				nodeName = nodeName.replaceAll("\\s+", "");
+//			}
+//			
+//		} else {
+//			if(!node.isRoot() 
+//					&& !node.toString().equals("Methods") 
+//					&& !node.toString().equals("Fields")
+//					&& !header_subheaderNames.contains(node.toString())) {
+//				nodeName = nodeName.replaceAll("[^a-zA-Z0-9_]", "");
+//				nodeName = nodeName.replaceAll("\\s+", "");
+//			}
+//		}
+//		
+//		return nodeName;
+//	}
 	
 	private class Selector implements TreeSelectionListener {
 		public void valueChanged(TreeSelectionEvent e) {
@@ -578,7 +557,8 @@ public class SplitPane extends JFrame{
 			if (node == null) 
 				return;
 			
-			String nodeName = nodeNameGenerator(node);
+			NodeNameGenerator gen = new NodeNameGenerator(header_subheaderNames);
+			String nodeName = gen.generator(node);
 			
 			String htmlfileName = null;
 			
@@ -604,15 +584,17 @@ public class SplitPane extends JFrame{
 	
 	private class SelectFocus extends FocusAdapter {
 		public void focusGained(FocusEvent evt) {
-			searchBar.setText("");
-		}
-		
-		public void focusLost(FocusEvent evt) {
-			if(searchBar.getText() == null) {
-				searchBar.setText("Search");
-				collapseAll(tree);
+			if(searchBar.getText().equals("Search")) {
+				searchBar.setText("");
 			}
 		}
+		
+//		public void focusLost(FocusEvent evt) {
+//			if(searchBar.getText() == null) {
+//				searchBar.setText("Search");
+//				collapseAll(tree);
+//			}
+//		}
 	}
 	
 	private void collapseAll(JTree tree) {
@@ -633,11 +615,11 @@ public class SplitPane extends JFrame{
 
 	private class DocListener implements DocumentListener {
 		public void insertUpdate(DocumentEvent e) {
-			filterTree(searchBar.getText(), mustSearchAll);
+			filterTree(searchBar.getText());
 		}
 		
 		public void removeUpdate(DocumentEvent e) {
-			filterTree(searchBar.getText(), mustSearchAll);
+			filterTree(searchBar.getText());
 		}
 		
 		public void changedUpdate(DocumentEvent e) {

@@ -61,7 +61,6 @@ public class setHTML extends JEditorPane {
 		});
 	}
 	
-	
 	public void setCSS() {
 //		java.net.URL font = getClass().getResource("/data/Raleway-Regular.ttf");
 //		String fontString = font.toString();
@@ -126,6 +125,18 @@ public class setHTML extends JEditorPane {
 	
 	public HashMap<String, ArrayList<String>> get_mapofCodes() {
 		return mapofCodes;
+	}
+	
+	public HashMap<String, String> get_searchAllExamples() {
+		return searchAllExamples;
+	}
+	
+	public HashMap<String, String> get_searchAllDescriptions() {
+		return searchAllDescriptions;
+	}
+	
+	public HashMap<String, String> get_savedHTML() {
+		return savedHTML;
 	}
 	
 	public void fillIn(URL urllink, String nodeName) {

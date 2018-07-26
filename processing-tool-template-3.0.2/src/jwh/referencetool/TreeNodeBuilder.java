@@ -64,8 +64,7 @@ public class TreeNodeBuilder {
 					&& !leaf.getUserObject().toString().startsWith(textToMatch.toLowerCase())
 					&& !leaf.getUserObject().toString().toLowerCase().contains(textToMatch.toLowerCase()) 
 					&& !parentstring.contains(textToMatch.toLowerCase())
-					&& !gparentstring.contains(textToMatch.toLowerCase())
-					&& !rootstring.contains(textToMatch.toLowerCase())){
+					&& !gparentstring.contains(textToMatch.toLowerCase())){
 				DefaultMutableTreeNode parent = (DefaultMutableTreeNode) leaf.getParent();
 
 				

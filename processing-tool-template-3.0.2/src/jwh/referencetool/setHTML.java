@@ -4,7 +4,6 @@ import javax.swing.JEditorPane;
 import javax.swing.JButton;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
-import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.StyleSheet;
 
@@ -27,7 +26,6 @@ public class setHTML extends JEditorPane {
 	String description = "";
 	String syntax = "";
 	String constructor = "";
-	HTMLDocument doc;
 
 	ArrayList<String> parameterNames = new ArrayList<String>();
 	ArrayList<String> methodNames = new ArrayList<String>();
@@ -38,6 +36,8 @@ public class setHTML extends JEditorPane {
 	ArrayList<String> exampleImages = new ArrayList<String>();
 	ArrayList<String> exampleCodes = new ArrayList<String>();
 	HashMap<String, ArrayList<String>> mapofCodes = new HashMap<String, ArrayList<String>>();
+	HashMap<String, String> searchAllDescriptions = new HashMap<String, String>();
+	HashMap<String, String> searchAllExamples = new HashMap<String, String>();
 	ArrayList<String> related = new ArrayList<String>();
 	HashMap<String, String> savedHTML = new HashMap<String, String>();
 	
@@ -50,12 +50,6 @@ public class setHTML extends JEditorPane {
 		setCSS();
 		editorkit.setAutoFormSubmission(false);
 		this.setEditorKit(editorkit);
-		doc = (HTMLDocument) this.getDocument();
-//		try {
-//			doc.setBase(new URL("http://www.google.com"));
-//		} catch(Exception e) {
-//			e.printStackTrace();
-//		}
 		
 		this.addHyperlinkListener(new HyperlinkListener() {
 			@Override
@@ -79,22 +73,34 @@ public class setHTML extends JEditorPane {
 		css.addRule(".sectionheaderStyle {width : 70px; valign: top}");
 	}
 	
-	public void parseHTML(URL urlLink, String original, boolean initiated) {
-		if(savedHTML.containsKey(original) && initiated) {
-			this.setText(savedHTML.get(original));
+	public void parseHTML(URL urlLink, String nodeName, boolean initiated) {
+		if(savedHTML.containsKey(nodeName) && initiated) {
+			this.setText(savedHTML.get(nodeName));
 		} else {
-			if(!original.equals("Methods") && !original.equals("Fields")) {
+			if(!nodeName.equals("Methods") && !nodeName.equals("Fields")) {
 				RegEx regexer = new RegEx(urlLink);
 				name = regexer.parseName();
 
 				regexer.parseExamples();
 				exampleImages = regexer.get_exampleImages();
 				exampleCodes = regexer.get_exampleCodes();
-				if(!mapofCodes.containsKey(original)) {
-					mapofCodes.put(original, exampleCodes);
+				if(!mapofCodes.containsKey(nodeName)) {
+					mapofCodes.put(nodeName, exampleCodes);
+					StringBuilder sb = new StringBuilder();
+					for(String code : exampleCodes) {
+						sb.append(code);
+						sb.append(" ");
+					}
+					searchAllExamples.put(nodeName, sb.toString());
 				}
+				
 
 				description = regexer.parseDescription();
+				
+				if(!searchAllDescriptions.containsKey(nodeName)) {
+					searchAllDescriptions.put(nodeName, description);
+				}
+				
 				regexer.parseParameters();
 				parameterNames = regexer.get_parameterNames();
 				parameterDescs = regexer.get_parameterDescs();
@@ -113,7 +119,7 @@ public class setHTML extends JEditorPane {
 				constructor = regexer.parseConstructor();
 				related = regexer.parseRelated();
 
-				fillIn(urlLink, original);
+				fillIn(urlLink, nodeName);
 			}
 		}
 	}
@@ -122,7 +128,7 @@ public class setHTML extends JEditorPane {
 		return mapofCodes;
 	}
 	
-	public void fillIn(URL urllink, String original) {
+	public void fillIn(URL urllink, String nodeName) {
 		String finalexampleString = exampleString(urllink);
 		String descriptionString = descriptionString();
 		String syntaxString = syntaxString();
@@ -146,8 +152,8 @@ public class setHTML extends JEditorPane {
 		total = total.replaceAll(" *< ", " &lt ");
 		total = total.replaceAll(" *<= ", " &lt;= ");
 //		this.setText(total);
-		if(!savedHTML.containsKey(original)) {
-			savedHTML.put(original, total);
+		if(!savedHTML.containsKey(nodeName)) {
+			savedHTML.put(nodeName, total);
 		}
 	}
 	

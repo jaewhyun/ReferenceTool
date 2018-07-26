@@ -102,7 +102,7 @@ public class SplitPane extends JFrame{
 			e.printStackTrace();
 		}
 		
-		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
 		ge.registerFont(font);
 		
@@ -143,11 +143,11 @@ public class SplitPane extends JFrame{
 		});
 		
 		searchAll = new JCheckBox("Search All");
-		searchAll.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				mustSearchAll = true;
-			}
-		});
+//		searchAll.addActionListener(new ActionListener() {
+//			public void actionPerformed(ActionEvent e) {
+//				mustSearchAll = true;
+//			}
+//		});
 		
 		searchBar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -405,11 +405,6 @@ public class SplitPane extends JFrame{
 			for(int i = 0; i < exampleCodes.size(); i++) {
 				JButton newbutton;
 				final String exampleCode = exampleCodes.get(i);
-//				if(exampleCodes.size() == 1) {
-//					newbutton = new JButton("Try Example");
-//				} else {
-//					newbutton = new JButton("Example "+ (i+1));
-//				}
 				
 				newbutton = new JButton(Integer.toString(i+1));
 				newbutton.addActionListener(new ActionListener() {
@@ -460,10 +455,6 @@ public class SplitPane extends JFrame{
 			tree.updateUI();
 //			
 			leftscrollPane.getViewport().setView(tree);
-			
-//			for(int i = 0; i< tree.getRowCount();i++) {
-//				tree.expandRow(i);
-//			}
 			
 			DefaultTreeCellRenderer renderer = (DefaultTreeCellRenderer) tree.getCellRenderer();
 			renderer.setLeafIcon(null);
@@ -516,51 +507,63 @@ public class SplitPane extends JFrame{
 		while(e.hasMoreElements()) {
 			DefaultMutableTreeNode node = (DefaultMutableTreeNode) e.nextElement();
 			
-			String nodeName = node.toString();
-			String original = node.toString();
-			String htmlfileName = null;
+			String nodeName = "";
+			String htmlfileName = "";
+			nodeName = nodeNameGenerator(node);
 			
 			if(node.isLeaf()) {
-				DefaultMutableTreeNode nodeParent = (DefaultMutableTreeNode) node.getParent();
-				DefaultMutableTreeNode nodeGParent = (DefaultMutableTreeNode) nodeParent.getParent();
-				
-				if(nodeParent.toString().equals("Methods") || nodeParent.toString().equals("Fields")) {
-					String nodeGParentName = nodeGParent.toString();
-					nodeName = nodeGParentName+"_"+nodeName;
-				}
-				
-				String lasttwo = nodeName.substring(nodeName.length() - 2);
-				
-				if(lasttwo.equals("()")) {
-					nodeName = nodeName.replaceAll("[()]", "");
-					nodeName = nodeName + "_";
-					htmlfileName = "/data/reference/"+nodeName+".html";
-				} else if(nodeName.indexOf('_') >= 0) {
-					nodeName = nodeName.replaceAll("[^a-zA-Z0-9_]", "");
-					htmlfileName = "/data/reference/"+nodeName+".html";
-				} else {
-					nodeName = nodeName.replaceAll("[^a-zA-Z0-9_]", "");
-					nodeName = nodeName.replaceAll("\\s+", "");
-					htmlfileName = "/data/reference/"+nodeName+".html";
-				}
-				
+				htmlfileName = "/data/reference/" + nodeName + ".html";
 				java.net.URL htmlURL = getClass().getResource(htmlfileName);
-				htmlPane.parseHTML(htmlURL, original, initiated);
+				htmlPane.parseHTML(htmlURL, nodeName, initiated);
 			} else {
 				if(!node.isRoot() 
 						&& !node.toString().equals("Methods") 
 						&& !node.toString().equals("Fields")
 						&& !header_subheaderNames.contains(node.toString())) {
-					nodeName = nodeName.replaceAll("[^a-zA-Z0-9_]", "");
-					nodeName = nodeName.replaceAll("\\s+", "");
-					htmlfileName = "/data/reference/"+nodeName+".html";
+					htmlfileName = "/data/reference/" + nodeName + ".html";
 					java.net.URL htmlURL = getClass().getResource(htmlfileName);
-					htmlPane.parseHTML(htmlURL, original, initiated);
+					htmlPane.parseHTML(htmlURL, nodeName, initiated);
 				}
 			}
 		}
 	}
 	
+	private String nodeNameGenerator(DefaultMutableTreeNode node) {
+		String nodeName = node.toString();
+		
+		if(node.isLeaf()) {
+			DefaultMutableTreeNode nodeParent = (DefaultMutableTreeNode) node.getParent();
+			DefaultMutableTreeNode nodeGParent = (DefaultMutableTreeNode) nodeParent.getParent();
+			
+			if(nodeParent.toString().equals("Methods") || nodeParent.toString().equals("Fields")) {
+				String nodeGParentName = nodeGParent.toString();
+				nodeName = nodeGParentName+"_"+nodeName;
+			}
+			
+			String lasttwo = nodeName.substring(nodeName.length() - 2);
+			
+			if(lasttwo.equals("()")) {
+				nodeName = nodeName.replaceAll("[()]", "");
+				nodeName = nodeName + "_";
+			} else if(nodeName.indexOf('_') >= 0) {
+				nodeName = nodeName.replaceAll("[^a-zA-Z0-9_]", "");
+			} else {
+				nodeName = nodeName.replaceAll("[^a-zA-Z0-9_]", "");
+				nodeName = nodeName.replaceAll("\\s+", "");
+			}
+			
+		} else {
+			if(!node.isRoot() 
+					&& !node.toString().equals("Methods") 
+					&& !node.toString().equals("Fields")
+					&& !header_subheaderNames.contains(node.toString())) {
+				nodeName = nodeName.replaceAll("[^a-zA-Z0-9_]", "");
+				nodeName = nodeName.replaceAll("\\s+", "");
+			}
+		}
+		
+		return nodeName;
+	}
 	
 	private class Selector implements TreeSelectionListener {
 		public void valueChanged(TreeSelectionEvent e) {
@@ -575,19 +578,19 @@ public class SplitPane extends JFrame{
 			if (node == null) 
 				return;
 			
-			String nodeName = node.toString();
+			String nodeName = nodeNameGenerator(node);
 			
 			String htmlfileName = null;
 			
 			if(node.isLeaf()) {
-			
 				DefaultMutableTreeNode nodeParent = (DefaultMutableTreeNode) node.getParent();
+				DefaultMutableTreeNode nodeGParent = (DefaultMutableTreeNode) nodeParent.getParent();
 				
 				if(node.toString().equals("Methods") || node.toString().equals("Fields")) {
 					htmlPane.setText("<p>Please search for " + nodeParent.toString() + "</p>");
+				} else {
+					setFile(nodeName);
 				}
-				
-				setFile(nodeName);
 			} else {
 				if(!node.isRoot() 
 						&& !node.toString().equals("Methods") 

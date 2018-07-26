@@ -73,6 +73,7 @@ public class SplitPane extends JFrame{
 	JButton reset;
 	JCheckBox searchAll;
 	boolean mustSearchAll = false;
+	boolean initiated = false;
 	JScrollPane leftscrollPane;
 	JScrollPane rightscrollPane;
 	JPanel rightpanel;
@@ -105,7 +106,7 @@ public class SplitPane extends JFrame{
 		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
 		ge.registerFont(font);
 		
-		Root = new DefaultMutableTreeNode("References");
+		Root = new DefaultMutableTreeNode("12345");
 		setTree();
 		treeModel = new DefaultTreeModel(Root);
 		tree = new JTree(treeModel);
@@ -200,6 +201,8 @@ public class SplitPane extends JFrame{
 		splitPane.setPreferredSize(new Dimension(750,400));
 		
 		this.getContentPane().add(splitPane);
+		
+		readinAllHTML();
 	}
 	
 	private void readinLists() {
@@ -377,11 +380,15 @@ public class SplitPane extends JFrame{
 	}
 	
 
-	public void setFile(URL urllink, String nodeName) {
-		htmlPane.parseHTML(urllink, nodeName);
+	public void setFile(String nodeName) {
+		htmlPane.parseHTML(null, nodeName, initiated);
 		  
-		ArrayList<String> exampleCodes = htmlPane.get_exampleCodes();
-		//System.out.println(exampleCodes);
+		HashMap<String, ArrayList<String>> mapofCodes = htmlPane.get_mapofCodes();
+		ArrayList<String> exampleCodes = null;
+		if(mapofCodes.containsKey(nodeName)) {
+			exampleCodes = mapofCodes.get(nodeName);
+		}
+		
 		if(exampleCodes.size() != 0) {
 			panel = Box.createHorizontalBox();
 			panel.setBackground(new Color(245, 245, 245));
@@ -409,6 +416,7 @@ public class SplitPane extends JFrame{
 					@Override
 					public void actionPerformed(ActionEvent e) {
 						editor.setText(exampleCode);
+						editor.requestFocus();
 					}
 				});
 				newbutton.setActionCommand(Integer.toString(i));
@@ -418,6 +426,7 @@ public class SplitPane extends JFrame{
 			panel.add(panelButtons);
 			rightpanel.add(panel, BorderLayout.PAGE_END);
 			panel.revalidate();
+			
 		} else {
 			if(panel != null) {
 				panel.removeAll();
@@ -501,13 +510,65 @@ public class SplitPane extends JFrame{
 		return newOne;
 	}
 	
+	public void readinAllHTML() {
+		Enumeration e = Root.preorderEnumeration();
+		
+		while(e.hasMoreElements()) {
+			DefaultMutableTreeNode node = (DefaultMutableTreeNode) e.nextElement();
+			
+			String nodeName = node.toString();
+			String original = node.toString();
+			String htmlfileName = null;
+			
+			if(node.isLeaf()) {
+				DefaultMutableTreeNode nodeParent = (DefaultMutableTreeNode) node.getParent();
+				DefaultMutableTreeNode nodeGParent = (DefaultMutableTreeNode) nodeParent.getParent();
+				
+				if(nodeParent.toString().equals("Methods") || nodeParent.toString().equals("Fields")) {
+					String nodeGParentName = nodeGParent.toString();
+					nodeName = nodeGParentName+"_"+nodeName;
+				}
+				
+				String lasttwo = nodeName.substring(nodeName.length() - 2);
+				
+				if(lasttwo.equals("()")) {
+					nodeName = nodeName.replaceAll("[()]", "");
+					nodeName = nodeName + "_";
+					htmlfileName = "/data/reference/"+nodeName+".html";
+				} else if(nodeName.indexOf('_') >= 0) {
+					nodeName = nodeName.replaceAll("[^a-zA-Z0-9_]", "");
+					htmlfileName = "/data/reference/"+nodeName+".html";
+				} else {
+					nodeName = nodeName.replaceAll("[^a-zA-Z0-9_]", "");
+					nodeName = nodeName.replaceAll("\\s+", "");
+					htmlfileName = "/data/reference/"+nodeName+".html";
+				}
+				
+				java.net.URL htmlURL = getClass().getResource(htmlfileName);
+				htmlPane.parseHTML(htmlURL, original, initiated);
+			} else {
+				if(!node.isRoot() 
+						&& !node.toString().equals("Methods") 
+						&& !node.toString().equals("Fields")
+						&& !header_subheaderNames.contains(node.toString())) {
+					nodeName = nodeName.replaceAll("[^a-zA-Z0-9_]", "");
+					nodeName = nodeName.replaceAll("\\s+", "");
+					htmlfileName = "/data/reference/"+nodeName+".html";
+					java.net.URL htmlURL = getClass().getResource(htmlfileName);
+					htmlPane.parseHTML(htmlURL, original, initiated);
+				}
+			}
+		}
+	}
+	
 	
 	private class Selector implements TreeSelectionListener {
 		public void valueChanged(TreeSelectionEvent e) {
 			
 			if(panel != null) 
-//				panel.revalidate();
 				panel.removeAll();
+			
+			initiated = true;
 			
 			DefaultMutableTreeNode node = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
 			
@@ -519,43 +580,20 @@ public class SplitPane extends JFrame{
 			String htmlfileName = null;
 			
 			if(node.isLeaf()) {
-				//System.out.println("here");
+			
 				DefaultMutableTreeNode nodeParent = (DefaultMutableTreeNode) node.getParent();
-				DefaultMutableTreeNode nodeGParent = (DefaultMutableTreeNode) nodeParent.getParent();
-				if(nodeParent.toString().equals("Methods") || nodeParent.toString().equals("Fields")) {
-					String nodeGParentName = nodeGParent.toString();
-					nodeName = nodeGParentName+"_"+nodeName;
-					//System.out.println(nodeName);
-				} 
 				
-				String lasttwo = nodeName.substring(nodeName.length()-2);
-				
-				if(lasttwo.equals("()")) {
-					nodeName = nodeName.replaceAll("[()]", "");
-					nodeName = nodeName + "_";
-					htmlfileName = "/data/reference/"+nodeName+".html";
-				} else if(nodeName.indexOf('_') >= 0) {
-					nodeName = nodeName.replaceAll("[^a-zA-Z0-9_]", "");
-					htmlfileName = "/data/reference/"+nodeName+".html";
-				} else {
-					nodeName = nodeName.replaceAll("[^a-zA-Z0-9_]", "");
-					//System.out.println(nodeName.toString());
-					nodeName = nodeName.replaceAll("\\s+", "");
-					htmlfileName = "/data/reference/"+nodeName+".html";
+				if(node.toString().equals("Methods") || node.toString().equals("Fields")) {
+					htmlPane.setText("<p>Please search for " + nodeParent.toString() + "</p>");
 				}
 				
-				java.net.URL htmlURL = getClass().getResource(htmlfileName);
-				setFile(htmlURL, nodeName);
+				setFile(nodeName);
 			} else {
 				if(!node.isRoot() 
 						&& !node.toString().equals("Methods") 
 						&& !node.toString().equals("Fields")
 						&& !header_subheaderNames.contains(node.toString())) {
-					nodeName = nodeName.replaceAll("[^a-zA-Z0-9_]", "");
-					nodeName = nodeName.replaceAll("\\s+", "");
-					htmlfileName = "/data/reference/"+nodeName+".html";
-					java.net.URL htmlURL = getClass().getResource(htmlfileName);
-					setFile(htmlURL, nodeName);
+					setFile(nodeName);
 				}
 			}
 		}

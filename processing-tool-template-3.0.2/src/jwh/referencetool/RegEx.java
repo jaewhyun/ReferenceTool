@@ -8,17 +8,18 @@ import java.net.URL;
 
 public class RegEx {
 	String theWholeThing = "";
-	String returns = "";
 	
 	ArrayList<String> parameterNames = new ArrayList<String>();
 	ArrayList<String> parameterDescs = new ArrayList<String>();
 	ArrayList<String> exampleImages = new ArrayList<String>();
 	ArrayList<String> exampleCodes = new ArrayList<String>();
+	ArrayList<String> methodNames = new ArrayList<String>();
+	ArrayList<String> methodDescs = new ArrayList<String>();
+	ArrayList<String> fieldNames = new ArrayList<String>();
+	ArrayList<String> fieldDescs = new ArrayList<String>();
 	ArrayList<String> related = new ArrayList<String>();
 	
 	private String readHTML(URL htmlName) throws IOException {
-		System.out.println("in readhtml");
-		System.out.println(htmlName.toString());
 		BufferedReader in = new BufferedReader(new InputStreamReader(htmlName.openStream()));
 		String line;
 		StringBuilder stringBuilder = new StringBuilder();
@@ -143,7 +144,7 @@ public class RegEx {
 	public String parseReturns() {
 		Pattern pattern = Pattern.compile("<th scope=\"row\">Returns</th><td class=\"code\">(.+?(?=</td>))");
 		Matcher matcher = pattern.matcher(theWholeThing);
-		
+		String returns = "";
 		if(matcher.find()) {
 			returns = matcher.group(1);
 		}
@@ -160,12 +161,76 @@ public class RegEx {
 			pattern = Pattern.compile("<a class=\"code\" .+>(.+?(?=</a>))");
 			matcher = pattern.matcher(relatedBlock);
 			
-			while(matcher.find()) {
+			if(matcher.find()) {
 				related.add(matcher.group(1));
 			}
 		}
 		
 		return related;
+	}
+	
+	public String parseConstructor() {
+		Pattern pattern = Pattern.compile("<th scope=\"row\">Constructor</th><td>([\\S\\s]+?(?=</td>))");
+		Matcher matcher = pattern.matcher(theWholeThing);
+		String constructor = "";
+		if(matcher.find()) {
+			constructor = matcher.group(1);
+		}
+		
+		return constructor;
+	}
+	
+	public void parseMethods() {
+		Pattern pattern = Pattern.compile("<th scope=\"row\">Methods</th><td><table cellpadding=\"0\" cellspacing=\"0\" border=\"0\"><tr class=\"\">([\\S\\s]+?(?=</table>))");
+		Matcher matcher = pattern.matcher(theWholeThing);
+		
+		
+		if(matcher.find()) {
+			String methodsBlock = matcher.group(1);
+			
+			pattern = Pattern.compile("(?:\\n*\\t*<th scope=\"row\"><a href=.+>(.+?(?=</a>))</a></th>\\n*\\t*<td>(.+?(?=</td>)))");
+			matcher = pattern.matcher(methodsBlock);
+			
+			while(matcher.find()) {
+				methodNames.add(matcher.group(1));
+				methodDescs.add(matcher.group(2));
+			}
+		}
+	}
+	
+	public void parseFields() {
+		Pattern pattern = Pattern.compile("<th scope=\"row\"><b>Fields</b></th><td><table cellpadding=\"0\" cellspacing=\"0\" border=\"0\"><tr class=\"\">([\\S\\s]+?(?=</table>))");
+		Matcher matcher = pattern.matcher(theWholeThing);
+		String fieldsBlock = "";
+		
+		if(matcher.find()) {
+			fieldsBlock = matcher.group(1);
+			
+			pattern = Pattern.compile("(?:\\n*\\t*<th scope=\"row\"><a href=.+>(.+?(?=</a>))</a></th>\\n*\\t*<td>(.+?(?=</td>)))");
+			matcher = pattern.matcher(fieldsBlock);
+			
+			while(matcher.find()) {
+				fieldNames.add(matcher.group(1));
+				fieldDescs.add(matcher.group(2));
+			}
+		}
+		
+	}
+	
+	public ArrayList<String> get_methodNames() {
+		return methodNames;
+	}
+	
+	public ArrayList<String> get_methodDescs() {
+		return methodDescs;
+	}
+	
+	public ArrayList<String> get_fieldNames() {
+		return fieldNames;
+	}
+	
+	public ArrayList<String> get_fieldDescs() {
+		return fieldDescs;
 	}
 	
 	public ArrayList<String> get_parameterNames() {

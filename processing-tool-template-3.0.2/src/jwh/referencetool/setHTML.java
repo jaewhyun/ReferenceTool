@@ -6,10 +6,15 @@ import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.StyleSheet;
+import javax.swing.text.Document;
+import javax.swing.text.Highlighter;
+import javax.swing.text.DefaultHighlighter;
+import javax.swing.text.BadLocationException;
 
 import processing.app.Platform;
 import processing.app.ui.Editor;
 
+import java.awt.Color;
 import java.awt.Desktop;
 import java.io.*;
 import java.net.URI;
@@ -42,9 +47,7 @@ public class setHTML extends JEditorPane {
 	HashMap<String, String> savedHTML = new HashMap<String, String>();
 	
 	public setHTML() {
-		// not sure how this is used just yet
 		this.setContentType("text/html");
-//		editorkit = new HTMLEditorKit();
 		editorkit = new PreWrapHTMLEditorKit();
 		css = editorkit.getStyleSheet();
 		setCSS();
@@ -62,19 +65,68 @@ public class setHTML extends JEditorPane {
 	}
 	
 	public void setCSS() {
-//		java.net.URL font = getClass().getResource("/data/Raleway-Regular.ttf");
-//		String fontString = font.toString();
-//		System.out.println(fontString);
-//		css.addRule("body {font-family:" + fontString + "; font-size:9px}");
-		css.addRule("body {font-family: raleway; font-size:9px}");
+		css.addRule("body {font-family: ProcessingSansPro-Regular; font-size: 9px}");
 		css.addRule(".sectionStyle {padding-top: 20px}");
 		css.addRule(".widthStyle {width : 70px}");
 		css.addRule(".sectionheaderStyle {width : 70px; valign: top}");
 	}
 	
-	public void parseHTML(URL urlLink, String nodeName, boolean initiated) {
-		if(savedHTML.containsKey(nodeName) && initiated) {
+	public void parseHTML(URL urlLink, String nodeName, boolean initiated, boolean searchAll, String searchText) {
+		if(savedHTML.containsKey(nodeName) && initiated && !searchAll) {
 			this.setText(savedHTML.get(nodeName));
+//			Document doc = this.getDocument();
+//			try {
+//				String docstring = doc.getText(0,  doc.getLength());
+//				System.out.println(docstring);
+//			} catch (BadLocationException ex) {
+//				ex.printStackTrace();
+//			}
+			
+		} else if(savedHTML.containsKey(nodeName) && initiated && searchAll) {
+			System.out.println("here");
+			String saved = savedHTML.get(nodeName);
+			
+			if(searchText.equals("or")
+					|| searchText.equals("for")
+					|| searchText.equals("and")
+					|| searchText.equals("is")
+					|| searchText.equals("in")
+					|| searchText.equals("me")
+					|| searchText.equals("he")
+					|| searchText.equals("she")
+					|| searchText.equals("had")) {
+				searchText = " " + searchText + " ";
+				System.out.println("searchText");
+			}
+			
+			String find = "((?i)"+searchText+")";
+			Pattern pattern = Pattern.compile(find);
+			Matcher matcher = pattern.matcher(saved);
+			if(matcher.find()) {
+				String found = matcher.group(1);
+				saved = saved.replace(matcher.group(1), "<font color=\"#db4730\">"+matcher.group(1)+"</font>");
+			}
+			
+			System.out.println(saved);
+			this.setText(saved);
+			
+			
+			// will come back to this later - for now highlighter does not work even though it finds the right words
+//			Highlighter.HighlightPainter painter = new DefaultHighlighter.DefaultHighlightPainter(Color.ORANGE);
+//			int offset = saved.indexOf(searchText);
+//			int length = searchText.length();
+//			
+//			while(offset != -1) {
+//				try {
+//					System.out.println(saved.substring(offset, offset+length));
+//					this.getHighlighter().addHighlight(offset, offset+length, painter);
+//					offset = saved.indexOf(searchText, offset + 1);
+//				} catch (BadLocationException ble){
+//					ble.printStackTrace();
+//				}
+//			}
+			
+			
 		} else {
 			if(!nodeName.equals("Methods") && !nodeName.equals("Fields")) {
 				RegEx regexer = new RegEx(urlLink);
@@ -193,7 +245,6 @@ public class setHTML extends JEditorPane {
 					String testString = "modes/java/reference/"+imageLocation;
 					File imagefile = Platform.getContentFile(testString);
 					testString = imagefile.toURI().toString();
-//					System.out.println(testString);
 					imageLocation = "<td><img src=\""+testString+"\"></td><td width = 10px>&nbsp;</td>";
 				}
 				
@@ -206,15 +257,16 @@ public class setHTML extends JEditorPane {
 					if(codeLines[j].contains("//") 
 							&& !codeLines[j].contains("https://") 
 							&& !codeLines[j].contains("http://")) {
-						codeLines[j] = codeLines[j].replace("//", "<span style=\"color: #3d9a3e\">//");
-						if(codeLines[j].contains(";")) {
+						codeLines[j] = codeLines[j].replace("//", "<span style=\"color: #5a7aad\">//");
+						if(codeLines[j].contains(";") && !codeLines[j].contains("&lt;")) {
 							codeLines[j] = codeLines[j].replaceAll(";", ";</span>");
 						}
+						
 						codeLines[j] = codeLines[j] + "</span>";
 					} 
 					
 					if(codeLines[j].contains("/*") || codeLines[j].contains("/**")) {
-						codeLines[j] = codeLines[j].replace("/*", "<span style=\"color: #3d9a3e\">/*");
+						codeLines[j] = codeLines[j].replace("/*", "<span style=\"color: #5a7aad\">/*");
 						if(codeLines[j].contains("\\*+\\/")) {
 							codeLines[j] = codeLines[j].replace("\\*+\\/", "*/</span>");
 						}	
@@ -223,10 +275,7 @@ public class setHTML extends JEditorPane {
 					
 					code = code + codeLines[j] + "<br>";
 				}
-				
-//				System.out.println(code);
 
-//				code = code.replaceAll("//", "<span style=\"color: #3d9a3e\">//");
 				code = "<td valign = \"top\"><pre >"+ code + "</pre></td></tr>";
 				if(nomoreImages == true) {
 					nomoreImagesCode.add(exampletr + code);
@@ -236,7 +285,6 @@ public class setHTML extends JEditorPane {
 				if(i < (exampleCodes.size()-1) && imageLocation.equals("")) {
 					code = code + hr;
 				}
-//				//System.out.println(code);
 				
 				if(!imageLocation.equals("")) {
 					finalexampleString = finalexampleString + exampletr + imageLocation+code;
@@ -244,8 +292,6 @@ public class setHTML extends JEditorPane {
 					finalexampleString = finalexampleString + exampletr + code;
 				}
 			}
-			
-//			finalexampleString = finalexampleString + "</table>";
 			
 			if(nomoreImages == false) {
 				finalexampleString = finalexampleString + "</table>";
@@ -264,7 +310,6 @@ public class setHTML extends JEditorPane {
 			finalexampleString = "";
 		}
 
-//		//System.out.println("\\n");
 		return finalexampleString;
 	}
 	
@@ -273,7 +318,6 @@ public class setHTML extends JEditorPane {
 		
 		descriptionstring = descriptionstring + description + "</td></tr></table>";
 		
-//		//System.out.println(descriptionstring);
 		return descriptionstring;
 	}
 	
@@ -325,7 +369,6 @@ public class setHTML extends JEditorPane {
 			finalparamstring = parameterstring + finalparamstring + "</table>";
 		}
 		
-//		//System.out.println(finalparamstring);
 		return finalparamstring;
 	}
 	
@@ -334,8 +377,6 @@ public class setHTML extends JEditorPane {
 		if(!returns.equals("")) {
 			returnstring = "<table class=\"sectionStyle\"><tr valign=\"top\"><td class=\"widthStyle\"><u>Returns</u></td><td>"+returns+"</td></tr></table>";
 		}
-		
-//		System.out.println(returnstring);
 
 		return returnstring;
 	}
@@ -382,8 +423,7 @@ public class setHTML extends JEditorPane {
 			
 			finalmethodstring = methodstring + finalmethodstring + "</table>";
 		}
-		
-//		//System.out.println(finalparamstring);
+	
 		return finalmethodstring;
 	}
 	
@@ -407,7 +447,6 @@ public class setHTML extends JEditorPane {
 			finalfieldstring = fieldstring + finalfieldstring + "</table>";
 		}
 		
-//		//System.out.println(finalparamstring);
 		return finalfieldstring;
 	}
 	

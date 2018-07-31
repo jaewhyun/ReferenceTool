@@ -5,28 +5,14 @@ import java.util.*;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Desktop;
-import java.awt.event.KeyAdapter;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-import java.awt.event.KeyEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.LinkedHashMap;
-
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.FontFormatException;
-import java.awt.GraphicsEnvironment;
-import java.awt.GridBagConstraints;
+
+import java.net.URL;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -35,6 +21,7 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
+import javax.swing.UIManager;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -45,19 +32,21 @@ import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.DocumentEvent;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeSelectionModel;
 import javax.swing.tree.TreeNode;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeCellRenderer;
 
 import processing.app.exec.SystemOutSiphon;
 import processing.app.Base;
 import processing.app.tools.Tool;
 import processing.app.ui.Editor;
-
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeCellRenderer;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
+import processing.app.ui.Toolkit;
 
 public class SplitPane extends JFrame{
 	List<Header> listofHeaders = new ArrayList<Header>();
@@ -74,7 +63,6 @@ public class SplitPane extends JFrame{
 	JCheckBox searchAll;
 	boolean mustSearchAll = false;
 	boolean initiated = false;
-	boolean started = false;
 	JScrollPane leftscrollPane;
 	JScrollPane rightscrollPane;
 	JPanel rightpanel;
@@ -82,6 +70,7 @@ public class SplitPane extends JFrame{
 	ArrayList<String> referenceList = new ArrayList<String>();
 	ArrayList<Leaf> trackLeaves = new ArrayList<Leaf>();
 	HashSet<String> header_subheaderNames = new HashSet<String>();
+	String splashhtml;
 	
 	public SplitPane(Editor editorInput) {
 		this.setTitle("References");
@@ -92,16 +81,7 @@ public class SplitPane extends JFrame{
 	}
 	
 	private void setGUI() {
-		java.net.URL fontURL = getClass().getResource("/data/Raleway-Regular.ttf");
-		try {
-			font = Font.createFont(Font.TRUETYPE_FONT, fontURL.openStream());
-			font = font.deriveFont(Font.PLAIN, 9);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-		ge.registerFont(font);
+		Font htmlfont = Toolkit.getSansFont(9, Font.PLAIN);
 		
 		Root = new DefaultMutableTreeNode("12345");
 		setTree();
@@ -122,9 +102,16 @@ public class SplitPane extends JFrame{
 		JPanel leftpanel = new JPanel();
 		rightpanel = new JPanel();
 		  
-		leftpanel.setFont(font);
 		leftpanel.setLayout(new BoxLayout(leftpanel, BoxLayout.Y_AXIS));
 		rightpanel.setLayout(new BorderLayout());
+		
+		searchAll = new JCheckBox("Search All");
+		java.net.URL htmlURL = getClass().getResource("/data/splash.html");
+		try {
+			splashhtml = splashHTML(htmlURL);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		
 		searchBar = new JTextField("Search");
 		searchBar.addFocusListener(new SelectFocus());
@@ -136,10 +123,15 @@ public class SplitPane extends JFrame{
 				searchAll.setSelected(false);
 				mustSearchAll = false;
 				searchBar.setText("");
+				htmlPane.setText(splashhtml);
+			
+				if(panel != null) {
+					panel.removeAll();
+					panel.revalidate();
+				}
 			}
 		});
 		
-		searchAll = new JCheckBox("Search All");
 		
 		searchBar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -161,10 +153,9 @@ public class SplitPane extends JFrame{
 		buttonCheckPane.add(reset);
 		
 		leftscrollPane = new JScrollPane(tree);
-		leftscrollPane.setFont(font);
 		rightscrollPane = new JScrollPane(htmlPane);
-		rightscrollPane.setFont(font);
-		
+		htmlPane.setFont(font);
+
 		rightpanel.add(rightscrollPane, BorderLayout.CENTER);
 		
 		searchBar.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -177,7 +168,9 @@ public class SplitPane extends JFrame{
 		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 		splitPane.setLeftComponent(leftpanel);
 		splitPane.setRightComponent(rightpanel);
-		
+
+		htmlPane.setText(splashhtml);
+
 		htmlPane.setEditable(false);
 		
 		splitPane.setDividerLocation(200);
@@ -355,7 +348,7 @@ public class SplitPane extends JFrame{
 	
 
 	public void setFile(String nodeName) {
-		htmlPane.parseHTML(null, nodeName, initiated);
+		htmlPane.parseHTML(null, nodeName, initiated, searchAll.isSelected(), searchBar.getText());
 		  
 		HashMap<String, ArrayList<String>> mapofCodes = htmlPane.get_mapofCodes();
 		ArrayList<String> exampleCodes = null;
@@ -371,10 +364,6 @@ public class SplitPane extends JFrame{
 
 			panelButtons.add(Box.createRigidArea(new Dimension(10,0)));
 			panelButtons.add(Box.createHorizontalGlue());
-			
-			if(exampleCodes.size() == 1) {
-				//System.out.println("only one");
-			}
 			
 			for(int i = 0; i < exampleCodes.size(); i++) {
 				JButton newbutton;
@@ -442,8 +431,9 @@ public class SplitPane extends JFrame{
 			HashMap<String, String> savedHTML = htmlPane.get_savedHTML();
 			
 			TreeNodeBuilder b = new TreeNodeBuilder(text, savedHTML, header_subheaderNames, searchAllExamples, searchAllDescriptions);
-			filteredRoot = b.prune((DefaultMutableTreeNode) filteredRoot.getRoot(), searchAll.isSelected());
 			
+			filteredRoot = b.prune((DefaultMutableTreeNode) filteredRoot.getRoot(), searchAll.isSelected());
+
 			treeModel.setRoot(filteredRoot);
 			
 			tree.setModel(treeModel);
@@ -493,7 +483,7 @@ public class SplitPane extends JFrame{
 			if(node.isLeaf()) {
 				htmlfileName = "/data/reference/" + nodeName + ".html";
 				java.net.URL htmlURL = getClass().getResource(htmlfileName);
-				htmlPane.parseHTML(htmlURL, nodeName, initiated);
+				htmlPane.parseHTML(htmlURL, nodeName, initiated, false, "");
 			} else {
 				if(!node.isRoot() 
 						&& !node.toString().equals("Methods") 
@@ -501,48 +491,29 @@ public class SplitPane extends JFrame{
 						&& !header_subheaderNames.contains(node.toString())) {
 					htmlfileName = "/data/reference/" + nodeName + ".html";
 					java.net.URL htmlURL = getClass().getResource(htmlfileName);
-					htmlPane.parseHTML(htmlURL, nodeName, initiated);
+					htmlPane.parseHTML(htmlURL, nodeName, initiated, false, "");
 				}
 			}
 		}
 	}
 	
-//	private String generator(DefaultMutableTreeNode node) {
-//		String nodeName = node.toString();
-//		
-//		if(node.isLeaf()) {
-//			DefaultMutableTreeNode nodeParent = (DefaultMutableTreeNode) node.getParent();
-//			DefaultMutableTreeNode nodeGParent = (DefaultMutableTreeNode) nodeParent.getParent();
-//			
-//			if(nodeParent.toString().equals("Methods") || nodeParent.toString().equals("Fields")) {
-//				String nodeGParentName = nodeGParent.toString();
-//				nodeName = nodeGParentName+"_"+nodeName;
-//			}
-//			
-//			String lasttwo = nodeName.substring(nodeName.length() - 2);
-//			
-//			if(lasttwo.equals("()")) {
-//				nodeName = nodeName.replaceAll("[()]", "");
-//				nodeName = nodeName + "_";
-//			} else if(nodeName.indexOf('_') >= 0) {
-//				nodeName = nodeName.replaceAll("[^a-zA-Z0-9_]", "");
-//			} else {
-//				nodeName = nodeName.replaceAll("[^a-zA-Z0-9_]", "");
-//				nodeName = nodeName.replaceAll("\\s+", "");
-//			}
-//			
-//		} else {
-//			if(!node.isRoot() 
-//					&& !node.toString().equals("Methods") 
-//					&& !node.toString().equals("Fields")
-//					&& !header_subheaderNames.contains(node.toString())) {
-//				nodeName = nodeName.replaceAll("[^a-zA-Z0-9_]", "");
-//				nodeName = nodeName.replaceAll("\\s+", "");
-//			}
-//		}
-//		
-//		return nodeName;
-//	}
+	private static String splashHTML(URL htmlURL) throws IOException {
+		BufferedReader in = new BufferedReader(new InputStreamReader(htmlURL.openStream()));
+		String line;
+		StringBuilder stringBuilder = new StringBuilder();
+		String ls = System.getProperty("line.separator");
+		
+		try {
+			while ((line = in.readLine()) != null) {
+				stringBuilder.append(line);
+				stringBuilder.append(ls);
+			}
+			
+			return stringBuilder.toString();
+		} finally {
+			in.close();
+		}
+	}
 	
 	private class Selector implements TreeSelectionListener {
 		public void valueChanged(TreeSelectionEvent e) {
@@ -565,12 +536,10 @@ public class SplitPane extends JFrame{
 			if(node.isLeaf()) {
 				DefaultMutableTreeNode nodeParent = (DefaultMutableTreeNode) node.getParent();
 				DefaultMutableTreeNode nodeGParent = (DefaultMutableTreeNode) nodeParent.getParent();
+
+				setFile(nodeName);
 				
-				if(node.toString().equals("Methods") || node.toString().equals("Fields")) {
-					htmlPane.setText("<p>Please search for " + nodeParent.toString() + "</p>");
-				} else {
-					setFile(nodeName);
-				}
+				
 			} else {
 				if(!node.isRoot() 
 						&& !node.toString().equals("Methods") 
@@ -588,13 +557,6 @@ public class SplitPane extends JFrame{
 				searchBar.setText("");
 			}
 		}
-		
-//		public void focusLost(FocusEvent evt) {
-//			if(searchBar.getText() == null) {
-//				searchBar.setText("Search");
-//				collapseAll(tree);
-//			}
-//		}
 	}
 	
 	private void collapseAll(JTree tree) {

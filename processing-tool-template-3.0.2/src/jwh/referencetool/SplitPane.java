@@ -27,6 +27,7 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
@@ -58,6 +59,8 @@ public class SplitPane extends JFrame{
 	JTree tree;
 	Boolean filtered = false;
 	JTextField searchBar;
+	JComboBox searchHistory;
+	String previousSearches[] = new String[5]; 
 	JTextArea textArea = new JTextArea();
 	JButton reset;
 	JCheckBox searchAll;
@@ -71,6 +74,7 @@ public class SplitPane extends JFrame{
 	ArrayList<Leaf> trackLeaves = new ArrayList<Leaf>();
 	HashSet<String> header_subheaderNames = new HashSet<String>();
 	String splashhtml;
+	int searchCount = 0;
 	
 	public SplitPane(Editor editorInput) {
 		this.setTitle("References");
@@ -113,8 +117,9 @@ public class SplitPane extends JFrame{
 			e.printStackTrace();
 		}
 		
-		searchBar = new JTextField("Search");
-		searchBar.addFocusListener(new SelectFocus());
+//		searchBar = new JTextField("Search");
+//		searchBar.addFocusListener(new SelectFocus());
+		
 		textArea.getDocument().addDocumentListener(new DocListener());
 		reset = new JButton("RESET");
 		reset.addActionListener(new ActionListener() {
@@ -122,7 +127,7 @@ public class SplitPane extends JFrame{
 				collapseAll(tree);
 				searchAll.setSelected(false);
 				mustSearchAll = false;
-				searchBar.setText("");
+//				searchBar.setText("");
 				htmlPane.setText(splashhtml);
 			
 				if(panel != null) {
@@ -133,24 +138,44 @@ public class SplitPane extends JFrame{
 		});
 		
 		
-		searchBar.addActionListener(new ActionListener() {
+//		searchBar.addActionListener(new ActionListener() {
+//			public void actionPerformed(ActionEvent e) {
+//				int selStart = textArea.getSelectionStart();
+//				int selEnd = textArea.getSelectionEnd();
+//				textArea.replaceRange(searchBar.getText(), selStart, selEnd);
+//				searchBar.selectAll();
+//			}
+//		});
+		
+		
+//		searchBar.getDocument().addDocumentListener(new DocListener());
+//		searchBar.getDocument().putProperty("term", "Search");
+				
+		JPanel buttonCheckPanel = new JPanel();
+		buttonCheckPanel.setLayout(new BoxLayout(buttonCheckPanel, BoxLayout.LINE_AXIS));
+		buttonCheckPanel.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 10));
+		buttonCheckPanel.add(searchAll);
+		buttonCheckPanel.add(Box.createRigidArea(new Dimension(20, 0)));
+		buttonCheckPanel.add(reset);
+		
+		JPanel savedSearchesPanel = new JPanel();
+		savedSearchesPanel.setLayout(new BoxLayout(savedSearchesPanel, BoxLayout.LINE_AXIS));
+		searchHistory = new JComboBox(previousSearches);
+		searchHistory.setEditable(true);
+		searchHistory.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				JComboBox cb = (JComboBox)e.getSource();
 				int selStart = textArea.getSelectionStart();
 				int selEnd = textArea.getSelectionEnd();
-				textArea.replaceRange(searchBar.getText(), selStart, selEnd);
-				searchBar.selectAll();
+				textArea.replaceRange(searchHistory.getSelectedItem().toString(), selStart, selEnd);
+				((JTextField) searchHistory.getEditor().getEditorComponent()).selectAll();
 			}
 		});
 		
-		searchBar.getDocument().addDocumentListener(new DocListener());
-		searchBar.getDocument().putProperty("term", "Search");
-				
-		JPanel buttonCheckPane = new JPanel();
-		buttonCheckPane.setLayout(new BoxLayout(buttonCheckPane, BoxLayout.LINE_AXIS));
-		buttonCheckPane.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 10));
-		buttonCheckPane.add(searchAll);
-		buttonCheckPane.add(Box.createRigidArea(new Dimension(20, 0)));
-		buttonCheckPane.add(reset);
+		((JTextField) searchHistory.getEditor().getEditorComponent()).getDocument().addDocumentListener(new DocListener());
+		((JTextField) searchHistory.getEditor().getEditorComponent()).getDocument().putProperty("term", "Search");
+
+		savedSearchesPanel.add(searchHistory);
 		
 		leftscrollPane = new JScrollPane(tree);
 		rightscrollPane = new JScrollPane(htmlPane);
@@ -158,10 +183,10 @@ public class SplitPane extends JFrame{
 
 		rightpanel.add(rightscrollPane, BorderLayout.CENTER);
 		
-		searchBar.setAlignmentX(Component.CENTER_ALIGNMENT);
-		leftpanel.add(searchBar);
-		buttonCheckPane.setAlignmentX(Component.CENTER_ALIGNMENT);
-		leftpanel.add(buttonCheckPane);
+		searchHistory.setAlignmentX(Component.CENTER_ALIGNMENT);
+		leftpanel.add(savedSearchesPanel);
+		buttonCheckPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+		leftpanel.add(buttonCheckPanel);
 		leftscrollPane.setAlignmentX(Component.CENTER_ALIGNMENT);
 		leftpanel.add(leftscrollPane);
 		
@@ -175,7 +200,7 @@ public class SplitPane extends JFrame{
 		
 		splitPane.setDividerLocation(200);
 		
-		splitPane.setPreferredSize(new Dimension(750,400));
+		splitPane.setPreferredSize(new Dimension(770,400));
 		
 		this.getContentPane().add(splitPane);
 		
@@ -348,8 +373,13 @@ public class SplitPane extends JFrame{
 	
 
 	public void setFile(String nodeName) {
-		htmlPane.parseHTML(null, nodeName, initiated, searchAll.isSelected(), searchBar.getText());
-		  
+		htmlPane.parseHTML(null, nodeName, initiated, searchAll.isSelected(), searchHistory.getSelectedItem().toString());  
+		previousSearches[searchCount] = nodeName;
+		searchCount++;
+		if(searchCount > 4) {
+			searchCount = 0;
+		}
+		
 		HashMap<String, ArrayList<String>> mapofCodes = htmlPane.get_mapofCodes();
 		ArrayList<String> exampleCodes = null;
 		if(mapofCodes.containsKey(nodeName)) {
@@ -553,9 +583,13 @@ public class SplitPane extends JFrame{
 	
 	private class SelectFocus extends FocusAdapter {
 		public void focusGained(FocusEvent evt) {
-			if(searchBar.getText().equals("Search")) {
-				searchBar.setText("");
-			}
+//			if(searchBar.getText().equals("Search")) {
+//				searchBar.setText("");
+//			}
+//			
+//			if(searchHistory.getSelectedItem().toString().equals("Search")) {
+//				searchBar.setText("");
+//			}
 		}
 	}
 	
@@ -577,11 +611,11 @@ public class SplitPane extends JFrame{
 
 	private class DocListener implements DocumentListener {
 		public void insertUpdate(DocumentEvent e) {
-			filterTree(searchBar.getText());
+			filterTree(((JTextField) searchHistory.getEditor().getEditorComponent()).getText());
 		}
 		
 		public void removeUpdate(DocumentEvent e) {
-			filterTree(searchBar.getText());
+			filterTree(((JTextField) searchHistory.getEditor().getEditorComponent()).getText());
 		}
 		
 		public void changedUpdate(DocumentEvent e) {

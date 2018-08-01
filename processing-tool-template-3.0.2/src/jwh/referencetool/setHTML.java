@@ -72,20 +72,10 @@ public class setHTML extends JEditorPane {
 	}
 	
 	public void parseHTML(URL urlLink, String nodeName, boolean initiated, boolean searchAll, String searchText) {
-		if(savedHTML.containsKey(nodeName) && initiated && !searchAll) {
-			this.setText(savedHTML.get(nodeName));
-//			Document doc = this.getDocument();
-//			try {
-//				String docstring = doc.getText(0,  doc.getLength());
-//				System.out.println(docstring);
-//			} catch (BadLocationException ex) {
-//				ex.printStackTrace();
-//			}
-			
-		} else if(savedHTML.containsKey(nodeName) && initiated && searchAll) {
-			System.out.println("here");
+		if(savedHTML.containsKey(nodeName) && initiated && searchAll && !searchText.equals("")) {
 			String saved = savedHTML.get(nodeName);
 			
+			this.setText(savedHTML.get(nodeName));
 			if(searchText.equals("or")
 					|| searchText.equals("for")
 					|| searchText.equals("and")
@@ -96,7 +86,6 @@ public class setHTML extends JEditorPane {
 					|| searchText.equals("she")
 					|| searchText.equals("had")) {
 				searchText = " " + searchText + " ";
-				System.out.println("searchText");
 			}
 			
 			String find = "((?i)"+searchText+")";
@@ -107,7 +96,6 @@ public class setHTML extends JEditorPane {
 				saved = saved.replace(matcher.group(1), "<font color=\"#db4730\">"+matcher.group(1)+"</font>");
 			}
 			
-			System.out.println(saved);
 			this.setText(saved);
 			
 			
@@ -126,7 +114,8 @@ public class setHTML extends JEditorPane {
 //				}
 //			}
 			
-			
+		} else if(savedHTML.containsKey(nodeName) && initiated) {
+			this.setText(savedHTML.get(nodeName));
 		} else {
 			if(!nodeName.equals("Methods") && !nodeName.equals("Fields")) {
 				RegEx regexer = new RegEx(urlLink);

@@ -53,7 +53,7 @@ public class ReferenceTool implements Tool {
 	  Editor editor = base.getActiveEditor();
 	  try {
 	  	if(newpane == null) {
-	  		newpane = new SplitPane(editor);
+	  		newpane = new SplitPane(base);
 	    		System.out.println("Reference Tool 1.0.0 by Jae Hyun");
 	  	}
 	  	newpane.pack();

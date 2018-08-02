@@ -2,67 +2,41 @@ package jwh.referencetool;
 
 import java.io.*;
 import java.util.*;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import java.awt.Dimension;
-import java.awt.Font;
-
+import java.awt.*;
+import java.awt.List;
+import java.awt.event.*;
 import java.net.URL;
 
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JSplitPane;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.JScrollPane;
-import javax.swing.JTree;
-import javax.swing.UIManager;
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JComponent;
-import javax.swing.event.HyperlinkEvent;
-import javax.swing.event.HyperlinkListener;
-import javax.swing.event.DocumentListener;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
-import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreeSelectionModel;
-import javax.swing.tree.TreeNode;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeCellRenderer;
+import javax.swing.*;
+import javax.swing.event.*;
+import javax.swing.tree.*;
 
 import processing.app.exec.SystemOutSiphon;
 import processing.app.Base;
 import processing.app.tools.Tool;
 import processing.app.ui.Editor;
 import processing.app.ui.Toolkit;
+import processing.app.Sketch;
+import processing.app.SketchCode;
 
 public class SplitPane extends JFrame{
-	List<Header> listofHeaders = new ArrayList<Header>();
+	ArrayList<Header> listofHeaders = new ArrayList<Header>();
 	Editor editor;
+	Base base;
 	DefaultTreeModel treeModel;
 	Font font;
 	setHTML htmlPane = new setHTML();
 	DefaultMutableTreeNode Root;
 	JTree tree;
 	Boolean filtered = false;
-	JTextField searchBar;
-	JComboBox searchHistory;
+	
 	String previousSearches[] = new String[5]; 
+	DefaultComboBoxModel<DefaultMutableTreeNode> boxModel = new DefaultComboBoxModel<DefaultMutableTreeNode>();
+	JComboBox<DefaultMutableTreeNode> searchBar;
+	
 	JTextArea textArea = new JTextArea();
 	JButton reset;
+	JButton search;
 	JCheckBox searchAll;
 	boolean mustSearchAll = false;
 	boolean initiated = false;
@@ -75,10 +49,13 @@ public class SplitPane extends JFrame{
 	HashSet<String> header_subheaderNames = new HashSet<String>();
 	String splashhtml;
 	int searchCount = 0;
+	int open = 0;
+	int openLocation = 0;
 	
-	public SplitPane(Editor editorInput) {
+	
+	public SplitPane(Base baseInput) {
 		this.setTitle("References");
-		editor = editorInput;
+		base = baseInput;
 		setGUI();
 		this.setVisible(true);
 		this.setResizable(false);
@@ -116,10 +93,7 @@ public class SplitPane extends JFrame{
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
-//		searchBar = new JTextField("Search");
-//		searchBar.addFocusListener(new SelectFocus());
-		
+
 		textArea.getDocument().addDocumentListener(new DocListener());
 		reset = new JButton("RESET");
 		reset.addActionListener(new ActionListener() {
@@ -127,68 +101,69 @@ public class SplitPane extends JFrame{
 				collapseAll(tree);
 				searchAll.setSelected(false);
 				mustSearchAll = false;
-//				searchBar.setText("");
+				((JTextField) searchBar.getEditor().getEditorComponent()).setText("");
 				htmlPane.setText(splashhtml);
-			
+				search.setEnabled(false);
 				if(panel != null) {
 					panel.removeAll();
 					panel.revalidate();
 				}
+				enableComponents(leftscrollPane, true);
 			}
 		});
-		
-		
-//		searchBar.addActionListener(new ActionListener() {
-//			public void actionPerformed(ActionEvent e) {
-//				int selStart = textArea.getSelectionStart();
-//				int selEnd = textArea.getSelectionEnd();
-//				textArea.replaceRange(searchBar.getText(), selStart, selEnd);
-//				searchBar.selectAll();
-//			}
-//		});
-		
-		
-//		searchBar.getDocument().addDocumentListener(new DocListener());
-//		searchBar.getDocument().putProperty("term", "Search");
+	
+		search = new JButton("Search");
+		search.setEnabled(false);
+		search.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				enableComponents(leftscrollPane, true);
+			}
+		});
 				
 		JPanel buttonCheckPanel = new JPanel();
 		buttonCheckPanel.setLayout(new BoxLayout(buttonCheckPanel, BoxLayout.LINE_AXIS));
-		buttonCheckPanel.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 10));
+		buttonCheckPanel.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
 		buttonCheckPanel.add(searchAll);
 		buttonCheckPanel.add(Box.createRigidArea(new Dimension(20, 0)));
-		buttonCheckPanel.add(reset);
+		buttonCheckPanel.add(search);
 		
 		JPanel savedSearchesPanel = new JPanel();
 		savedSearchesPanel.setLayout(new BoxLayout(savedSearchesPanel, BoxLayout.LINE_AXIS));
-		searchHistory = new JComboBox(previousSearches);
-		searchHistory.setEditable(true);
-		searchHistory.addActionListener(new ActionListener() {
+		searchBar = new JComboBox<DefaultMutableTreeNode>(boxModel);
+		searchBar.setEditable(true);
+
+		searchBar.setMaximumRowCount(5);
+		searchBar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				JComboBox cb = (JComboBox)e.getSource();
 				int selStart = textArea.getSelectionStart();
 				int selEnd = textArea.getSelectionEnd();
-				textArea.replaceRange(searchHistory.getSelectedItem().toString(), selStart, selEnd);
-				((JTextField) searchHistory.getEditor().getEditorComponent()).selectAll();
+				textArea.replaceRange(searchBar.getSelectedItem().toString(), selStart, selEnd);
+				((JTextField) searchBar.getEditor().getEditorComponent()).selectAll();
 			}
 		});
 		
-		((JTextField) searchHistory.getEditor().getEditorComponent()).getDocument().addDocumentListener(new DocListener());
-		((JTextField) searchHistory.getEditor().getEditorComponent()).getDocument().putProperty("term", "Search");
+		((JTextField) searchBar.getEditor().getEditorComponent()).getDocument().addDocumentListener(new DocListener());
+		((JTextField) searchBar.getEditor().getEditorComponent()).getDocument().putProperty("term", "Search");
 
-		savedSearchesPanel.add(searchHistory);
+		savedSearchesPanel.add(searchBar);
 		
 		leftscrollPane = new JScrollPane(tree);
+
 		rightscrollPane = new JScrollPane(htmlPane);
 		htmlPane.setFont(font);
 
 		rightpanel.add(rightscrollPane, BorderLayout.CENTER);
 		
-		searchHistory.setAlignmentX(Component.CENTER_ALIGNMENT);
+		searchBar.setAlignmentX(Component.CENTER_ALIGNMENT);
 		leftpanel.add(savedSearchesPanel);
 		buttonCheckPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
 		leftpanel.add(buttonCheckPanel);
 		leftscrollPane.setAlignmentX(Component.CENTER_ALIGNMENT);
 		leftpanel.add(leftscrollPane);
+		JPanel resetPanel = new JPanel();
+		resetPanel.setLayout(new BorderLayout(0,0));
+		resetPanel.add(reset);
+		leftpanel.add(resetPanel);
 		
 		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 		splitPane.setLeftComponent(leftpanel);
@@ -199,6 +174,7 @@ public class SplitPane extends JFrame{
 		htmlPane.setEditable(false);
 		
 		splitPane.setDividerLocation(200);
+		splitPane.setDividerSize(2);
 		
 		splitPane.setPreferredSize(new Dimension(770,400));
 		
@@ -371,14 +347,10 @@ public class SplitPane extends JFrame{
 		}
 	}
 	
-
-	public void setFile(String nodeName) {
-		htmlPane.parseHTML(null, nodeName, initiated, searchAll.isSelected(), searchHistory.getSelectedItem().toString());  
-		previousSearches[searchCount] = nodeName;
-		searchCount++;
-		if(searchCount > 4) {
-			searchCount = 0;
-		}
+	public void setFile(String nodeName, String original) {
+		
+		System.out.println("in setfile"); 
+		htmlPane.parseHTML(null, nodeName, initiated, searchAll.isSelected(), ((JTextField) searchBar.getEditor().getEditorComponent()).getText());  
 		
 		HashMap<String, ArrayList<String>> mapofCodes = htmlPane.get_mapofCodes();
 		ArrayList<String> exampleCodes = null;
@@ -403,8 +375,25 @@ public class SplitPane extends JFrame{
 				newbutton.addActionListener(new ActionListener() {
 					@Override
 					public void actionPerformed(ActionEvent e) {
-						editor.setText(exampleCode);
-						editor.requestFocus();
+						if(open == 0) {
+							base.handleNew();
+							openLocation = base.getEditors().size() - 1;
+						}
+						open = 1;
+						
+						if(openLocation < base.getEditors().size()) {
+							Editor editor = base.getEditors().get(openLocation);
+							
+							editor.setText(exampleCode);
+							editor.requestFocus();
+						} else {
+							base.handleNew();
+							openLocation = base.getEditors().size() - 1;
+							Editor editor = base.getEditors().get(openLocation);
+							
+							editor.setText(exampleCode);
+							editor.requestFocus();
+						}
 					}
 				});
 				newbutton.setActionCommand(Integer.toString(i));
@@ -420,6 +409,7 @@ public class SplitPane extends JFrame{
 				panel.removeAll();
 			}
 		}
+		System.out.println("successfully setfile");
 	}
 	
 	public void handleClose() {
@@ -527,6 +517,7 @@ public class SplitPane extends JFrame{
 		}
 	}
 	
+	
 	private static String splashHTML(URL htmlURL) throws IOException {
 		BufferedReader in = new BufferedReader(new InputStreamReader(htmlURL.openStream()));
 		String line;
@@ -547,14 +538,15 @@ public class SplitPane extends JFrame{
 	
 	private class Selector implements TreeSelectionListener {
 		public void valueChanged(TreeSelectionEvent e) {
-			
+
+			System.out.println("yikes");
 			if(panel != null) 
 				panel.removeAll();
-			
+		
 			initiated = true;
 			
 			DefaultMutableTreeNode node = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
-			
+		
 			if (node == null) 
 				return;
 			
@@ -563,19 +555,34 @@ public class SplitPane extends JFrame{
 			
 			String htmlfileName = null;
 			
+			System.out.println("here");
 			if(node.isLeaf()) {
 				DefaultMutableTreeNode nodeParent = (DefaultMutableTreeNode) node.getParent();
 				DefaultMutableTreeNode nodeGParent = (DefaultMutableTreeNode) nodeParent.getParent();
 
-				setFile(nodeName);
+				System.out.println("here too");
+				String currentText = ((JTextField) searchBar.getEditor().getEditorComponent()).getText();
+				System.out.println(currentText);
+			
+				setFile(nodeName, node.toString());
 				
+				searchBar.insertItemAt(node, 0);
 				
+				if(searchBar.getItemCount() > 5) {
+					searchBar.removeItemAt(5);
+				}
 			} else {
 				if(!node.isRoot() 
 						&& !node.toString().equals("Methods") 
 						&& !node.toString().equals("Fields")
 						&& !header_subheaderNames.contains(node.toString())) {
-					setFile(nodeName);
+					setFile(nodeName, node.toString());
+					
+					searchBar.insertItemAt(node, 0);
+					
+					if(searchBar.getItemCount() > 4) {
+						searchBar.removeItemAt(5);
+					}
 				}
 			}
 		}
@@ -583,13 +590,7 @@ public class SplitPane extends JFrame{
 	
 	private class SelectFocus extends FocusAdapter {
 		public void focusGained(FocusEvent evt) {
-//			if(searchBar.getText().equals("Search")) {
-//				searchBar.setText("");
-//			}
-//			
-//			if(searchHistory.getSelectedItem().toString().equals("Search")) {
-//				searchBar.setText("");
-//			}
+
 		}
 	}
 	
@@ -600,6 +601,7 @@ public class SplitPane extends JFrame{
 		DefaultTreeCellRenderer renderer = (DefaultTreeCellRenderer) tree.getCellRenderer();
 		renderer.setLeafIcon(null);
 		renderer.setClosedIcon(null);
+		
 		renderer.setOpenIcon(null);
 
 		int row = tree.getRowCount() - 1;
@@ -608,14 +610,36 @@ public class SplitPane extends JFrame{
 			row--;
 		}
 	}
+	
+	/*
+	 * https://stackoverflow.com/questions/10985734/java-swing-enabling-disabling-all-components-in-jpanel
+	 * Andrew Thompson
+	 */
+	private static void enableComponents(Container container, boolean enable) {
+		Component[] components = container.getComponents();
+		for(Component component : components) {
+			component.setEnabled(enable);
+			if(component instanceof Container) {
+				enableComponents((Container) component, enable);
+			}
+		}
+	}
 
 	private class DocListener implements DocumentListener {
 		public void insertUpdate(DocumentEvent e) {
-			filterTree(((JTextField) searchHistory.getEditor().getEditorComponent()).getText());
+			filterTree(((JTextField) searchBar.getEditor().getEditorComponent()).getText());
+			enableComponents(leftscrollPane, false);
+			search.setEnabled(true);
 		}
 		
 		public void removeUpdate(DocumentEvent e) {
-			filterTree(((JTextField) searchHistory.getEditor().getEditorComponent()).getText());
+			filterTree(((JTextField) searchBar.getEditor().getEditorComponent()).getText());
+			enableComponents(leftscrollPane, false);
+			search.setEnabled(true);
+			
+			if(((JTextField) searchBar.getEditor().getEditorComponent()).getText().equals("")) {
+				enableComponents(leftscrollPane, true);
+			}
 		}
 		
 		public void changedUpdate(DocumentEvent e) {

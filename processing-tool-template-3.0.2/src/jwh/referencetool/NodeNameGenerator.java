@@ -48,7 +48,6 @@ public class NodeNameGenerator {
 			}
 		}
 		
-		System.out.println(nodeName);
 		return nodeName;
 	}
 }

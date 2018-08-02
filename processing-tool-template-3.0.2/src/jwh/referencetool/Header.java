@@ -7,7 +7,6 @@ public class Header {
 	DefaultMutableTreeNode header;
 	int misc = 0;
 	Integer numberofSubHeaders = 0;
-//	ArrayList<DefaultMutableTreeNode> miscLeaves = new ArrayList<DefaultMutableTreeNode>();
 	ArrayList<Leaf> leaves = new ArrayList<Leaf>();
 	LinkedHashMap<SubHeader, Integer> subHeader_Number = new LinkedHashMap<SubHeader, Integer>();
 	
@@ -40,12 +39,10 @@ public class Header {
 	}
 	
 	public void add_miscLeaves(Leaf newleaf) {
-//		DefaultMutableTreeNode temp = new DefaultMutableTreeNode(leaf);
 		leaves.add(newleaf);
 	}
 	
 	public void connect_nodes() {
-//		System.out.println("connecting nodes");
 		for(Leaf currentleaf : leaves) {
 			header.add(currentleaf.get_leaf());
 		}

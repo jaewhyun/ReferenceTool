@@ -29,13 +29,12 @@ import processing.app.Base;
 import processing.app.tools.Tool;
 import processing.app.ui.Editor;
 
-
-
 // when creating a tool, the name of the main class which implements Tool must
 // be the same as the value defined for project.name in your build.properties
 
 public class ReferenceTool implements Tool {
   Base base;
+  static SplitPane newpane;
 
 
   public String getMenuTitle() {
@@ -51,13 +50,16 @@ public class ReferenceTool implements Tool {
 
   public void run() {
     // Get the currently active Editor to run the Tool on it
-    Editor editor = base.getActiveEditor();
-    SplitPane newpane = new SplitPane(editor);
-    newpane.pack();
-    newpane.setVisible(true);
-
-    // Fill in author.name, author.url, tool.prettyVersion and
-    // project.prettyName in build.properties for them to be auto-replaced here.
-    System.out.println("Reference Tool 1.0.0 by Jae Hyun");
+	  Editor editor = base.getActiveEditor();
+	  try {
+	  	if(newpane == null) {
+	  		newpane = new SplitPane(editor);
+	    		System.out.println("Reference Tool 1.0.0 by Jae Hyun");
+	  	}
+	  	newpane.pack();
+	    	newpane.setVisible(true);
+	  } catch (Exception e) {
+	    	e.printStackTrace();
+	  }
   }
 }

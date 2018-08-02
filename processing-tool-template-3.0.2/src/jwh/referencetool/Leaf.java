@@ -17,7 +17,6 @@ public class Leaf {
 			fields = new DefaultMutableTreeNode("Fields");
 		
 			leafInput = leafInput.replace("`", "");
-//			System.out.println(leafInput);
 		} 
 		
 		leaf = new DefaultMutableTreeNode(leafInput);

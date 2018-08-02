@@ -84,18 +84,8 @@ public class RegEx {
 			while(matcher.find()) {
 				String codeExample = matcher.group(1);
 				exampleCodes.add(matcher.group(1));
-				
-//				//System.out.println(matcher.group(1));
 			}
 		}
-	}
-	
-	public ArrayList<String> get_exampleImages() {
-		return exampleImages;
-	}
-	
-	public ArrayList<String> get_exampleCodes() {
-		return exampleCodes;
 	}
 	
 	public String parseDescription() {
@@ -107,7 +97,6 @@ public class RegEx {
 			description = matcher.group(1);
 		}
 		
-//		//System.out.println(description);
 		return description;
 	}
 	
@@ -121,7 +110,6 @@ public class RegEx {
 			syntax = matcher.group(1);
 		}
 		
-		//System.out.println(syntax);
 		return syntax;
 	}
 	
@@ -215,6 +203,14 @@ public class RegEx {
 			}
 		}
 		
+	}
+	
+	public ArrayList<String> get_exampleImages() {
+		return exampleImages;
+	}
+	
+	public ArrayList<String> get_exampleCodes() {
+		return exampleCodes;
 	}
 	
 	public ArrayList<String> get_methodNames() {

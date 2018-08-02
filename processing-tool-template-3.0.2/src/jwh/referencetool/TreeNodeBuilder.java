@@ -5,6 +5,8 @@ import java.util.*;
 import java.io.*;
 
 /**
+ * This class uses an implementation of Oliver Watkins' TreeNodeBuilder.
+ * 
  * Tree widget which allows the tree to be filtered on keystroke time. Only nodes who's
  * toString matches the search field will remain in the tree or its parents.
  *
@@ -19,7 +21,6 @@ import java.io.*;
 
 public class TreeNodeBuilder {
 	private String textToMatch;
-//	HashSet<String> clickableNodes;
 	HashSet<String> header_subheaderNames;
 	HashMap<String, String> savedHTML;
 	HashMap<String, String> searchAllDescriptions;
@@ -48,7 +49,6 @@ public class TreeNodeBuilder {
 		NodeNameGenerator gen = new NodeNameGenerator(header_subheaderNames);
 		
 		DefaultMutableTreeNode leaf = root.getFirstLeaf();
-//		System.out.println("current leaf is:" + leaf.toString());
 		
 		if(leaf.isRoot())
 			return false;
@@ -63,12 +63,31 @@ public class TreeNodeBuilder {
 				String code = "";
 				String description = "";
 				
-				if(searchAllExamples.containsKey(nodeName)) {
+				if(searchAllExamples.containsKey(nodeName) || searchAllDescriptions.containsKey(nodeName)) {
+					if(nodeName.equals("FloatDict")) {
+						System.out.println("yippie ki ye");
+					}
 					code = searchAllExamples.get(nodeName).toLowerCase();
 					description = searchAllDescriptions.get(nodeName).toLowerCase();
 
-					// does the example code match lower case?
-					if(!code.contains(textToMatch.toLowerCase()) || !description.contains(textToMatch.toLowerCase())) {
+					if(!code.contains(textToMatch.toLowerCase()) && !description.contains(textToMatch.toLowerCase())) {
+
+						
+						if(!leaf.toString().toLowerCase().startsWith(textToMatch.toLowerCase())) {
+							if(nodeName.equals("FloatDict")) {
+								System.out.println("yippie ki ye2");
+							}
+						} else if(!code.contains(textToMatch.toLowerCase())) {
+							if(nodeName.equals("FloatDict")) {
+								System.out.println("yippie ki ye3");
+							}
+							
+						} else if(!description.contains(textToMatch.toLowerCase())) {
+							if(nodeName.equals("FloatDict")) {
+								System.out.println("yippie ki ye4");
+							}
+						}
+						
 						if(parent != null) {
 							parent.remove(leaf);
 						}
@@ -78,7 +97,6 @@ public class TreeNodeBuilder {
 					
 				} else {
 					if(!savedHTML.containsKey(nodeName)) {
-						System.out.println("savedHTML didnot contain key");
 						if(parent!= null) {
 							parent.remove(leaf);
 						}
@@ -119,7 +137,6 @@ public class TreeNodeBuilder {
 					String nodeName = gen.generator(leaf);
 					
 					if(!savedHTML.containsKey(nodeName)) {
-						System.out.println("savedHTML didnot contain key");
 						if(parent!= null) {
 							parent.remove(leaf);
 						}

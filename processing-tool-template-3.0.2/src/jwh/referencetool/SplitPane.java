@@ -48,7 +48,7 @@ public class SplitPane extends JFrame{
 	ArrayList<Leaf> trackLeaves = new ArrayList<Leaf>();
 	HashSet<String> header_subheaderNames = new HashSet<String>();
 	String splashhtml;
-	int searchCount = 0;
+	
 	int open = 0;
 	int openLocation = 0;
 	
@@ -119,6 +119,7 @@ public class SplitPane extends JFrame{
 				enableComponents(leftscrollPane, true);
 			}
 		});
+		
 				
 		JPanel buttonCheckPanel = new JPanel();
 		buttonCheckPanel.setLayout(new BoxLayout(buttonCheckPanel, BoxLayout.LINE_AXIS));
@@ -131,6 +132,7 @@ public class SplitPane extends JFrame{
 		savedSearchesPanel.setLayout(new BoxLayout(savedSearchesPanel, BoxLayout.LINE_AXIS));
 		searchBar = new JComboBox<DefaultMutableTreeNode>(boxModel);
 		searchBar.setEditable(true);
+		
 
 		searchBar.setMaximumRowCount(5);
 		searchBar.addActionListener(new ActionListener() {
@@ -349,7 +351,6 @@ public class SplitPane extends JFrame{
 	
 	public void setFile(String nodeName, String original) {
 		
-		System.out.println("in setfile"); 
 		htmlPane.parseHTML(null, nodeName, initiated, searchAll.isSelected(), ((JTextField) searchBar.getEditor().getEditorComponent()).getText());  
 		
 		HashMap<String, ArrayList<String>> mapofCodes = htmlPane.get_mapofCodes();
@@ -409,7 +410,6 @@ public class SplitPane extends JFrame{
 				panel.removeAll();
 			}
 		}
-		System.out.println("successfully setfile");
 	}
 	
 	public void handleClose() {
@@ -539,7 +539,6 @@ public class SplitPane extends JFrame{
 	private class Selector implements TreeSelectionListener {
 		public void valueChanged(TreeSelectionEvent e) {
 
-			System.out.println("yikes");
 			if(panel != null) 
 				panel.removeAll();
 		
@@ -555,14 +554,11 @@ public class SplitPane extends JFrame{
 			
 			String htmlfileName = null;
 			
-			System.out.println("here");
 			if(node.isLeaf()) {
 				DefaultMutableTreeNode nodeParent = (DefaultMutableTreeNode) node.getParent();
 				DefaultMutableTreeNode nodeGParent = (DefaultMutableTreeNode) nodeParent.getParent();
 
-				System.out.println("here too");
 				String currentText = ((JTextField) searchBar.getEditor().getEditorComponent()).getText();
-				System.out.println(currentText);
 			
 				setFile(nodeName, node.toString());
 				

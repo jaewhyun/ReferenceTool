@@ -84,8 +84,7 @@ public class setHTML extends JEditorPane {
 					|| searchText.equals("me")
 					|| searchText.equals("he")
 					|| searchText.equals("she")
-					|| searchText.equals("had")
-					|| searchText.equals("arc")) {
+					|| searchText.equals("had")) {
 				searchText = " " + searchText + " ";
 			}
 			

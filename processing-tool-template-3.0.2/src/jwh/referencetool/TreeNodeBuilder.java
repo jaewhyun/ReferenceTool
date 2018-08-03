@@ -64,29 +64,10 @@ public class TreeNodeBuilder {
 				String description = "";
 				
 				if(searchAllExamples.containsKey(nodeName) || searchAllDescriptions.containsKey(nodeName)) {
-					if(nodeName.equals("FloatDict")) {
-						System.out.println("yippie ki ye");
-					}
 					code = searchAllExamples.get(nodeName).toLowerCase();
 					description = searchAllDescriptions.get(nodeName).toLowerCase();
 
 					if(!code.contains(textToMatch.toLowerCase()) && !description.contains(textToMatch.toLowerCase())) {
-
-						
-						if(!leaf.toString().toLowerCase().startsWith(textToMatch.toLowerCase())) {
-							if(nodeName.equals("FloatDict")) {
-								System.out.println("yippie ki ye2");
-							}
-						} else if(!code.contains(textToMatch.toLowerCase())) {
-							if(nodeName.equals("FloatDict")) {
-								System.out.println("yippie ki ye3");
-							}
-							
-						} else if(!description.contains(textToMatch.toLowerCase())) {
-							if(nodeName.equals("FloatDict")) {
-								System.out.println("yippie ki ye4");
-							}
-						}
 						
 						if(parent != null) {
 							parent.remove(leaf);

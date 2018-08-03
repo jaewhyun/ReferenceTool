@@ -21,14 +21,14 @@ import java.io.*;
 
 public class TreeNodeBuilder {
 	private String textToMatch;
-	HashSet<String> header_subheaderNames;
+	HashSet<String> headerSubHeaderNames;
 	HashMap<String, String> savedHTML;
 	HashMap<String, String> searchAllDescriptions;
 	HashMap<String, String> searchAllExamples;
 	
-	public TreeNodeBuilder(String textToMatch, HashMap<String, String> savedHTML, HashSet<String> header_subheaderNames, HashMap<String, String> searchAllExamples, HashMap<String, String> searchAllDescriptions) {
+	public TreeNodeBuilder(String textToMatch, HashMap<String, String> savedHTML, HashSet<String> headerSubHeaderNames, HashMap<String, String> searchAllExamples, HashMap<String, String> searchAllDescriptions) {
 		this.savedHTML = savedHTML;
-		this.header_subheaderNames = header_subheaderNames;
+		this.headerSubHeaderNames = headerSubHeaderNames;
 		this.textToMatch = textToMatch;
 		this.searchAllExamples = searchAllExamples;
 		this.searchAllDescriptions = searchAllDescriptions;
@@ -40,13 +40,16 @@ public class TreeNodeBuilder {
 		while(badLeaves) {
 			badLeaves = removeBadLeaves(root, searchAllSelected);
 		}
-		
+
 		return root;
 	}
 	
+	/*
+	 * Removing leaves that does not fit the search criteria
+	 */
 	private boolean removeBadLeaves(DefaultMutableTreeNode root, boolean searchAllSelected) {
 		boolean badLeaves = false;
-		NodeNameGenerator gen = new NodeNameGenerator(header_subheaderNames);
+		NodeNameGenerator gen = new NodeNameGenerator(headerSubHeaderNames);
 		
 		DefaultMutableTreeNode leaf = root.getFirstLeaf();
 		
@@ -54,11 +57,14 @@ public class TreeNodeBuilder {
 			return false;
 		
 		int leafCount = root.getLeafCount();
+		// if we are searching for all
 		if(searchAllSelected) {
+			// while going through all children of the root
 			for(int i = 0; i < leafCount; i++) {
 				DefaultMutableTreeNode nextLeaf = leaf.getNextLeaf();
 				DefaultMutableTreeNode parent = (DefaultMutableTreeNode) leaf.getParent();
 				
+				// get the generated node name (basically the html file name without .html)
 				String nodeName = gen.generator(leaf);
 				String code = "";
 				String description = "";
@@ -67,8 +73,10 @@ public class TreeNodeBuilder {
 					code = searchAllExamples.get(nodeName).toLowerCase();
 					description = searchAllDescriptions.get(nodeName).toLowerCase();
 
+					// basically if the node does not contain examples or descriptions that matches the seasrch
 					if(!code.contains(textToMatch.toLowerCase()) && !description.contains(textToMatch.toLowerCase())) {
 						
+						//prune
 						if(parent != null) {
 							parent.remove(leaf);
 						}
@@ -77,6 +85,7 @@ public class TreeNodeBuilder {
 					}
 					
 				} else {
+					// this leaves folders like methods, fields, headers....basically nodes that don't have html files
 					if(!savedHTML.containsKey(nodeName)) {
 						if(parent!= null) {
 							parent.remove(leaf);
@@ -101,7 +110,11 @@ public class TreeNodeBuilder {
 					gparentstring = leaf.getParent().getParent().toString().toLowerCase();
 				}
 				
-
+				// if a node name begins with the text search
+				// if a lower case of the node name begins with the lower case of the text search
+				// if a lower case of the node name contains the lower case of the text search (is this redundant?)
+				// if a parent lowercase contains the lower case text search
+				// if a grandparent lowercase contains the lower case text search
 				if(!leaf.getUserObject().toString().startsWith(textToMatch) 
 						&& !leaf.getUserObject().toString().startsWith(textToMatch.toLowerCase())
 						&& !leaf.getUserObject().toString().toLowerCase().contains(textToMatch.toLowerCase()) 
@@ -117,6 +130,7 @@ public class TreeNodeBuilder {
 				} else {
 					String nodeName = gen.generator(leaf);
 					
+					// this leaves folders like methods, fields, headers....basically nodes that don't have html files
 					if(!savedHTML.containsKey(nodeName)) {
 						if(parent!= null) {
 							parent.remove(leaf);

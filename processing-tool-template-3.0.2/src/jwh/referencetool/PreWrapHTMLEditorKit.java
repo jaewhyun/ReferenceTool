@@ -5,6 +5,8 @@ import javax.swing.text.html.HTML;
 import javax.swing.text.*;
 
 /**
+ * Fixing the <pre> tag of html to stay in its cell without having to resize the frame
+ * ---------------------------------------------------------------------------------------
  * https://stackoverflow.com/questions/3788624/pre-wrap-in-a-jeditorpane
  * @author Braulio Horta
  */

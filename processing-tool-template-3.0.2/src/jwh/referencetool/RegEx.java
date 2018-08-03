@@ -19,6 +19,20 @@ public class RegEx {
 	ArrayList<String> fieldDescs = new ArrayList<String>();
 	ArrayList<String> related = new ArrayList<String>();
 	
+	public RegEx(URL htmlName) {
+		try {
+			theWholeThing = readHTML(htmlName);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		String[] tokens = theWholeThing.split("<!-- ==================================== CONTENT - Headers ============================ -->");
+		tokens = tokens[1].split("<!-- ==================================== FOOTER ============================ -->");
+		String theWholeThing = tokens[0];
+	}
+	
+	/*
+	 * Reading in the html file
+	 */
 	private String readHTML(URL htmlName) throws IOException {
 		BufferedReader in = new BufferedReader(new InputStreamReader(htmlName.openStream()));
 		String line;
@@ -37,17 +51,9 @@ public class RegEx {
 		}
 	}
 	
-	public RegEx(URL htmlName) {
-		try {
-			theWholeThing = readHTML(htmlName);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		String[] tokens = theWholeThing.split("<!-- ==================================== CONTENT - Headers ============================ -->");
-		tokens = tokens[1].split("<!-- ==================================== FOOTER ============================ -->");
-		String theWholeThing = tokens[0];
-	}
-	
+	/*
+	 * Parsing for Name of the reference
+	 */
 	public String parseName() {
 		Pattern pattern = Pattern.compile("<th scope=\"row\">Name</th>\\s*<td><h3>(.+?(?=</h3>))");
 		Matcher matcher = pattern.matcher(theWholeThing);
@@ -60,6 +66,9 @@ public class RegEx {
 		return name;
 	}
 	
+	/*
+	 * Parsing for Examples of the reference
+	 */
 	public void parseExamples() {
 		//parse out entire block
 		Pattern pattern = Pattern.compile("<tr class=\"\"><th scope=\"row\">Examples</th><td>([\\S\\s]+?(?=</td>))");
@@ -88,6 +97,9 @@ public class RegEx {
 		}
 	}
 	
+	/*
+	 * Parsing for Descriptions of the reference
+	 */
 	public String parseDescription() {
 		Pattern pattern = Pattern.compile("<tr class=\"\">\\n*\\s*<th scope=\"row\">Description</th>\\n*\\s*<td>\\n*\\s*([\\S\\s]+?(?=\\n*</td>))");
 		Matcher matcher = pattern.matcher(theWholeThing);
@@ -100,6 +112,9 @@ public class RegEx {
 		return description;
 	}
 	
+	/*
+	 * Parsing for Syntax of the reference
+	 */
 	public String parseSyntax() {
 		Pattern pattern = Pattern.compile("<th scope=\"row\">Syntax</th><td><pre>([\\S\\s]+?(?=</pre>))");
 		Matcher matcher = pattern.matcher(theWholeThing);
@@ -113,6 +128,9 @@ public class RegEx {
 		return syntax;
 	}
 	
+	/*
+	 * Parsing for Parameters of the reference
+	 */
 	public void parseParameters() {
 		Pattern pattern = Pattern.compile("<th scope=\"row\">Parameters</th><td><table cellpadding=\"0\" cellspacing=\"0\" border=\"0\">([\\S\\s]+?(?=</table>))");
 		Matcher matcher = pattern.matcher(theWholeThing);
@@ -129,6 +147,9 @@ public class RegEx {
 		}
 	}
 	
+	/*
+	 * Parsing for Returns of the reference
+	 */
 	public String parseReturns() {
 		Pattern pattern = Pattern.compile("<th scope=\"row\">Returns</th><td class=\"code\">(.+?(?=</td>))");
 		Matcher matcher = pattern.matcher(theWholeThing);
@@ -140,6 +161,9 @@ public class RegEx {
 		return returns;
 	}
 	
+	/*
+	 * Parsing for Related of the reference
+	 */
 	public ArrayList<String> parseRelated() {
 		Pattern pattern = Pattern.compile("<th scope=\"row\">Related</th><td>([\\S\\s]+?(?=</td>))");
 		Matcher matcher = pattern.matcher(theWholeThing);
@@ -157,6 +181,9 @@ public class RegEx {
 		return related;
 	}
 	
+	/*
+	 * Parsing for Constructor of the reference
+	 */
 	public String parseConstructor() {
 		Pattern pattern = Pattern.compile("<th scope=\"row\">Constructor</th><td>([\\S\\s]+?(?=</td>))");
 		Matcher matcher = pattern.matcher(theWholeThing);
@@ -168,6 +195,9 @@ public class RegEx {
 		return constructor;
 	}
 	
+	/*
+	 * Parsing for Methods of the reference
+	 */
 	public void parseMethods() {
 		Pattern pattern = Pattern.compile("<th scope=\"row\">Methods</th><td><table cellpadding=\"0\" cellspacing=\"0\" border=\"0\"><tr class=\"\">([\\S\\s]+?(?=</table>))");
 		Matcher matcher = pattern.matcher(theWholeThing);
@@ -186,6 +216,9 @@ public class RegEx {
 		}
 	}
 	
+	/*
+	 * Parsing for Fields of the reference
+	 */
 	public void parseFields() {
 		Pattern pattern = Pattern.compile("<th scope=\"row\"><b>Fields</b></th><td><table cellpadding=\"0\" cellspacing=\"0\" border=\"0\"><tr class=\"\">([\\S\\s]+?(?=</table>))");
 		Matcher matcher = pattern.matcher(theWholeThing);
@@ -205,35 +238,35 @@ public class RegEx {
 		
 	}
 	
-	public ArrayList<String> get_exampleImages() {
+	public ArrayList<String> getExampleImages() {
 		return exampleImages;
 	}
 	
-	public ArrayList<String> get_exampleCodes() {
+	public ArrayList<String> getExampleCodes() {
 		return exampleCodes;
 	}
 	
-	public ArrayList<String> get_methodNames() {
+	public ArrayList<String> getMethodNames() {
 		return methodNames;
 	}
 	
-	public ArrayList<String> get_methodDescs() {
+	public ArrayList<String> getMethodDescs() {
 		return methodDescs;
 	}
 	
-	public ArrayList<String> get_fieldNames() {
+	public ArrayList<String> getFieldNames() {
 		return fieldNames;
 	}
 	
-	public ArrayList<String> get_fieldDescs() {
+	public ArrayList<String> getFieldDescs() {
 		return fieldDescs;
 	}
 	
-	public ArrayList<String> get_parameterNames() {
+	public ArrayList<String> getParameterNames() {
 		return parameterNames;
 	}
 	
-	public ArrayList<String> get_parameterDescs() {
+	public ArrayList<String> getParameterDescs() {
 		return parameterDescs;
 	}
 	

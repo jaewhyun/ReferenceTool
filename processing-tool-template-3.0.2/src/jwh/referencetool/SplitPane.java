@@ -25,13 +25,11 @@ public class SplitPane extends JFrame{
 	Base base;
 	DefaultTreeModel treeModel;
 	Font font;
-	setHTML htmlPane = new setHTML();
+	SetHTML htmlPane = new SetHTML();
 	DefaultMutableTreeNode Root;
 	JTree tree;
 	Boolean filtered = false;
-	
-	String previousSearches[] = new String[5]; 
-	DefaultComboBoxModel<DefaultMutableTreeNode> boxModel = new DefaultComboBoxModel<DefaultMutableTreeNode>();
+
 	JComboBox<DefaultMutableTreeNode> searchBar;
 	
 	JTextArea textArea = new JTextArea();
@@ -46,7 +44,7 @@ public class SplitPane extends JFrame{
 	JComponent panel;
 	ArrayList<String> referenceList = new ArrayList<String>();
 	ArrayList<Leaf> trackLeaves = new ArrayList<Leaf>();
-	HashSet<String> header_subheaderNames = new HashSet<String>();
+	HashSet<String> headerSubheaderNames = new HashSet<String>();
 	String splashhtml;
 	
 	int open = 0;
@@ -61,20 +59,27 @@ public class SplitPane extends JFrame{
 		this.setResizable(false);
 	}
 	
+	/*
+	 * Set up GUI
+	 */
 	private void setGUI() {
 		Font htmlfont = Toolkit.getSansFont(9, Font.PLAIN);
 		
 		Root = new DefaultMutableTreeNode("12345");
+		// read in all references and connect all nodes
 		setTree();
 		treeModel = new DefaultTreeModel(Root);
 		tree = new JTree(treeModel);
 	
 		tree.setRootVisible(false);
+		// root may be invisible but keep arrows
 		tree.setShowsRootHandles(true);
+		// keep click count to 1
 		tree.setToggleClickCount(1);
 		tree.getSelectionModel().addTreeSelectionListener(new Selector());
 		tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
 		
+		// get rid of folders 
 		DefaultTreeCellRenderer renderer = (DefaultTreeCellRenderer) tree.getCellRenderer();
 		renderer.setLeafIcon(null);
 		renderer.setClosedIcon(null);
@@ -88,12 +93,14 @@ public class SplitPane extends JFrame{
 		
 		searchAll = new JCheckBox("Search All");
 		java.net.URL htmlURL = getClass().getResource("/data/splash.html");
+		
 		try {
 			splashhtml = splashHTML(htmlURL);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 
+		// add document listener to track key movements
 		textArea.getDocument().addDocumentListener(new DocListener());
 		reset = new JButton("RESET");
 		reset.addActionListener(new ActionListener() {
@@ -121,6 +128,7 @@ public class SplitPane extends JFrame{
 		});
 		
 				
+		// adding search button and search all checkbox
 		JPanel buttonCheckPanel = new JPanel();
 		buttonCheckPanel.setLayout(new BoxLayout(buttonCheckPanel, BoxLayout.LINE_AXIS));
 		buttonCheckPanel.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
@@ -128,12 +136,11 @@ public class SplitPane extends JFrame{
 		buttonCheckPanel.add(Box.createRigidArea(new Dimension(20, 0)));
 		buttonCheckPanel.add(search);
 		
+		// establishing the search bar and its layout
 		JPanel savedSearchesPanel = new JPanel();
 		savedSearchesPanel.setLayout(new BoxLayout(savedSearchesPanel, BoxLayout.LINE_AXIS));
-		searchBar = new JComboBox<DefaultMutableTreeNode>(boxModel);
+		searchBar = new JComboBox<DefaultMutableTreeNode>();
 		searchBar.setEditable(true);
-		
-
 		searchBar.setMaximumRowCount(5);
 		searchBar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -143,36 +150,37 @@ public class SplitPane extends JFrame{
 				((JTextField) searchBar.getEditor().getEditorComponent()).selectAll();
 			}
 		});
-		
 		((JTextField) searchBar.getEditor().getEditorComponent()).getDocument().addDocumentListener(new DocListener());
 		((JTextField) searchBar.getEditor().getEditorComponent()).getDocument().putProperty("term", "Search");
-
 		savedSearchesPanel.add(searchBar);
 		
 		leftscrollPane = new JScrollPane(tree);
-
 		rightscrollPane = new JScrollPane(htmlPane);
 		htmlPane.setFont(font);
 
 		rightpanel.add(rightscrollPane, BorderLayout.CENTER);
 		
+		// left side layout
 		searchBar.setAlignmentX(Component.CENTER_ALIGNMENT);
 		leftpanel.add(savedSearchesPanel);
 		buttonCheckPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
 		leftpanel.add(buttonCheckPanel);
 		leftscrollPane.setAlignmentX(Component.CENTER_ALIGNMENT);
 		leftpanel.add(leftscrollPane);
+		
+		// couldn't figure out a way for the button to expand the full width so I put it into a panel instead.
 		JPanel resetPanel = new JPanel();
 		resetPanel.setLayout(new BorderLayout(0,0));
 		resetPanel.add(reset);
 		leftpanel.add(resetPanel);
 		
+		// set left and right
 		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 		splitPane.setLeftComponent(leftpanel);
 		splitPane.setRightComponent(rightpanel);
 
+		// splash page
 		htmlPane.setText(splashhtml);
-
 		htmlPane.setEditable(false);
 		
 		splitPane.setDividerLocation(200);
@@ -182,38 +190,42 @@ public class SplitPane extends JFrame{
 		
 		this.getContentPane().add(splitPane);
 		
+		// reading in all html to start and saving it 
 		readinAllHTML();
 	}
 	
+	/*
+	 * Reading in reference lists for headers and subheaders to set the tree
+	 */
 	private void readinLists() {
-		java.net.URL htmlURL = getClass().getResource("/data/reference_summary.txt");
+		java.net.URL htmlURL = getClass().getResource("/data/referencetext/reference_summary.txt");
 				
 		try (BufferedReader br = new BufferedReader(new InputStreamReader(htmlURL.openStream()))){
 			String line;
 			while((line = br.readLine()) != null) {
 				Header newheader = new Header(line);
-				header_subheaderNames.add(line);
-				Root.add(newheader.get_header());
+				headerSubheaderNames.add(line);
+				Root.add(newheader.getHeader());
 				line = br.readLine();
-				newheader.set_misc(Integer.parseInt(line));
+				newheader.setMisc(Integer.parseInt(line));
 				line = br.readLine();
-				Integer num_subHeader = Integer.parseInt(line);
+				Integer numofsubHeaders = Integer.parseInt(line);
 				
-				if(num_subHeader != 0) {
-					newheader.set_numberofSubHeaders(num_subHeader);
+				if(numofsubHeaders != 0) {
+					newheader.setNumberofSubHeaders(numofsubHeaders);
 					LinkedHashMap<SubHeader, Integer> tempHashMap = new LinkedHashMap<SubHeader, Integer>();
-					for(int i = 0; i < num_subHeader; i++) {
+					for(int i = 0; i < numofsubHeaders; i++) {
 						line = br.readLine();
 						SubHeader tempSubHeader = new SubHeader(line);
-						header_subheaderNames.add(line);
+						headerSubheaderNames.add(line);
 						line = br.readLine();
 						Integer number = Integer.parseInt(line);
 						tempHashMap.put(tempSubHeader, number);
 					}
-					newheader.set_subHeader_Number(tempHashMap);
+					newheader.setSubHeaderNumber(tempHashMap);
 				}
 				
-				newheader.add_subHeaders();
+				newheader.addSubHeaders();
 				listofHeaders.add(newheader);
 			}
 		} catch (IOException e) {
@@ -221,8 +233,11 @@ public class SplitPane extends JFrame{
 		}
 	}
 	
+	/*
+	 * Reading in the rest of the references for Headers and Subheaders
+	 */
 	private void assignReferences() {
-		java.net.URL htmlURL = getClass().getResource("/data/reference_list.txt");
+		java.net.URL htmlURL = getClass().getResource("/data/referencetext/reference_list.txt");
 		int counter = 0;
 		
 		try(BufferedReader br = new BufferedReader(new InputStreamReader(htmlURL.openStream()))) {
@@ -237,11 +252,11 @@ public class SplitPane extends JFrame{
 		for(int i = 0; i < listofHeaders.size(); i++) {
 			// per header
 			Header tempHeader = listofHeaders.get(i);
-			LinkedHashMap<SubHeader, Integer> tempSubHeaders = tempHeader.get_subHeader_Number();
+			LinkedHashMap<SubHeader, Integer> tempSubHeaders = tempHeader.getSubHeaderNumber();
 			// check misc
-			int tempHeaderMiscNum = tempHeader.get_misc();
+			int tempHeaderMiscNum = tempHeader.getMisc();
 			// if misc not 0
-			if(tempHeader.get_misc() != 0) {
+			if(tempHeader.getMisc() != 0) {
 				for(int j = counter; j < tempHeaderMiscNum + counter; j++) {
 					// add misc references
 					Leaf newleaf = new Leaf(referenceList.get(j));
@@ -249,14 +264,14 @@ public class SplitPane extends JFrame{
 						trackLeaves.add(newleaf);
 					}
 					
-					tempHeader.add_miscLeaves(newleaf);
+					tempHeader.addMiscLeaves(newleaf);
 				}
 			}
 			
 			counter += tempHeaderMiscNum;
 			
 			// check for subheaders and if number of subheaders is not 0
-			if(tempHeader.get_numberofSubHeaders()!=0) {
+			if(tempHeader.getNumberofSubHeaders()!=0) {
 				// per subhead
 				for(Map.Entry<SubHeader, Integer> entry : tempSubHeaders.entrySet()) {
 					SubHeader tempSubHead = entry.getKey();
@@ -272,15 +287,18 @@ public class SplitPane extends JFrame{
 						inputList.add(newleaf);
 					}
 					
-					tempSubHead.add_leaf(inputList);
+					tempSubHead.addLeaves(inputList);
 					counter += tempSubHeadNum;
 				}
 			}
 		}
 	}
 	
+	/*
+	 * Reading in Methods and Fields references for some references
+	 */
 	private void assignleafMiscs() {
-		java.net.URL htmlURL = getClass().getResource("/data/leafmiscs.txt");
+		java.net.URL htmlURL = getClass().getResource("/data/referencetext/leafmiscs.txt");
 		ArrayList<String> listofmiscs = new ArrayList<String>();
 		
 		int counter = 0;
@@ -294,9 +312,8 @@ public class SplitPane extends JFrame{
 				if(line.indexOf('_') >= 0) {
 					output = line.split("_");
 					for(Leaf currentleaf : trackLeaves) {
-						String currentleafName = currentleaf.get_leaf().toString();
+						String currentleafName = currentleaf.getLeaf().toString();
 						if(currentleafName.equals(output[0])) {
-//							clickableNodes.add(currentleafName.toUpperCase());
 							if(output[1].indexOf(',') == -1) {
 								Integer numberofMethods = Integer.parseInt(output[1]);
 								
@@ -307,7 +324,7 @@ public class SplitPane extends JFrame{
 									methods.add(newnode);
 								}
 								
-								currentleaf.add_leafMethods(methods);
+								currentleaf.addLeafMethods(methods);
 							} else {
 								String[] parsed = output[1].split(",");
 								Integer numberofFields = Integer.parseInt(parsed[0]);
@@ -328,8 +345,8 @@ public class SplitPane extends JFrame{
 									methods.add(newnode);
 								}
 								
-								currentleaf.add_leafMethods(methods);
-								currentleaf.add_leafFields(fields);
+								currentleaf.addLeafMethods(methods);
+								currentleaf.addLeafFields(fields);
 							}
 						}
 					}
@@ -340,20 +357,26 @@ public class SplitPane extends JFrame{
 		}
 	}
 	
+	/*
+	 * Connecting all nodes together
+	 */
 	private void setTree() {
 		readinLists();
 		assignReferences();
 		assignleafMiscs();
 		for(Header head : listofHeaders) {
-			head.connect_nodes();
+			head.connectNodes();
 		}
 	}
 	
-	public void setFile(String nodeName, String original) {
+	/*
+	 * Setting html on the right as well as creating example try buttons and tying it to a new editor
+	 */
+	private void setFile(String nodeName, String original) {
 		
 		htmlPane.parseHTML(null, nodeName, initiated, searchAll.isSelected(), ((JTextField) searchBar.getEditor().getEditorComponent()).getText());  
 		
-		HashMap<String, ArrayList<String>> mapofCodes = htmlPane.get_mapofCodes();
+		HashMap<String, ArrayList<String>> mapofCodes = htmlPane.getMapofCodes();
 		ArrayList<String> exampleCodes = null;
 		if(mapofCodes.containsKey(nodeName)) {
 			exampleCodes = mapofCodes.get(nodeName);
@@ -376,17 +399,22 @@ public class SplitPane extends JFrame{
 				newbutton.addActionListener(new ActionListener() {
 					@Override
 					public void actionPerformed(ActionEvent e) {
+						// if open is 0, that means it hasn't previously been opened yet
 						if(open == 0) {
 							base.handleNew();
 							openLocation = base.getEditors().size() - 1;
 						}
 						open = 1;
 						
+						// if the the editor number is lower than the actual number of editors open rn,
+						// then retrieve that editor to populate the example text
 						if(openLocation < base.getEditors().size()) {
 							Editor editor = base.getEditors().get(openLocation);
 							
 							editor.setText(exampleCode);
 							editor.requestFocus();
+						// if the editor number is higher than the actual number of editors open rn,
+						// then open a new editor to populate the example text and remember that location instead
 						} else {
 							base.handleNew();
 							openLocation = base.getEditors().size() - 1;
@@ -406,6 +434,7 @@ public class SplitPane extends JFrame{
 			panel.revalidate();
 			
 		} else {
+			// if there are no examples but the panel is still populated, erase the buttons
 			if(panel != null) {
 				panel.removeAll();
 			}
@@ -417,6 +446,9 @@ public class SplitPane extends JFrame{
 	}
 	
 	/**
+	 * This method is derived from the tree widget of Oliver Watkins.
+	 * ------------------------------------------------------------------------------------
+	 * 
 	 * Tree widget which allows the tree to be filtered on keystroke time. Only nodes who's
 	 * toString matches the search field will remain in the tree or its parents.
 	 *
@@ -436,7 +468,7 @@ public class SplitPane extends JFrame{
 			tree.setModel(treeModel);
 
 			tree.updateUI();
-//			
+	
 			leftscrollPane.getViewport().setView(tree);
 			
 			DefaultTreeCellRenderer renderer = (DefaultTreeCellRenderer) tree.getCellRenderer();
@@ -446,11 +478,11 @@ public class SplitPane extends JFrame{
 			
 			return;
 		} else {
-			HashMap<String, String> searchAllExamples = htmlPane.get_searchAllExamples();
-			HashMap<String, String> searchAllDescriptions = htmlPane.get_searchAllDescriptions();
-			HashMap<String, String> savedHTML = htmlPane.get_savedHTML();
+			HashMap<String, String> searchAllExamples = htmlPane.getSearchAllExamples();
+			HashMap<String, String> searchAllDescriptions = htmlPane.getSearchAllDescriptions();
+			HashMap<String, String> savedHTML = htmlPane.getSavedHTML();
 			
-			TreeNodeBuilder b = new TreeNodeBuilder(text, savedHTML, header_subheaderNames, searchAllExamples, searchAllDescriptions);
+			TreeNodeBuilder b = new TreeNodeBuilder(text, savedHTML, headerSubheaderNames, searchAllExamples, searchAllDescriptions);
 			
 			filteredRoot = b.prune((DefaultMutableTreeNode) filteredRoot.getRoot(), searchAll.isSelected());
 
@@ -476,6 +508,9 @@ public class SplitPane extends JFrame{
 		filtered = true;
 	}
 	
+	/*
+	 * Copyright (c) Oliver.Watkins
+	 */
 	private DefaultMutableTreeNode copyNode(DefaultMutableTreeNode orig) {
 		DefaultMutableTreeNode newOne = new DefaultMutableTreeNode();
 		newOne.setUserObject(orig.getUserObject());
@@ -489,6 +524,9 @@ public class SplitPane extends JFrame{
 		return newOne;
 	}
 	
+	/*
+	 * Reading in all html reference files provided by Processing
+	 */
 	public void readinAllHTML() {
 		Enumeration e = Root.preorderEnumeration();
 		
@@ -497,7 +535,7 @@ public class SplitPane extends JFrame{
 			
 			String nodeName = "";
 			String htmlfileName = "";
-			NodeNameGenerator gen = new NodeNameGenerator(header_subheaderNames);
+			NodeNameGenerator gen = new NodeNameGenerator(headerSubheaderNames);
 			nodeName = gen.generator(node);
 			
 			if(node.isLeaf()) {
@@ -508,7 +546,7 @@ public class SplitPane extends JFrame{
 				if(!node.isRoot() 
 						&& !node.toString().equals("Methods") 
 						&& !node.toString().equals("Fields")
-						&& !header_subheaderNames.contains(node.toString())) {
+						&& !headerSubheaderNames.contains(node.toString())) {
 					htmlfileName = "/data/reference/" + nodeName + ".html";
 					java.net.URL htmlURL = getClass().getResource(htmlfileName);
 					htmlPane.parseHTML(htmlURL, nodeName, initiated, false, "");
@@ -517,7 +555,9 @@ public class SplitPane extends JFrame{
 		}
 	}
 	
-	
+	/*
+	 * Getting the splash page html
+	 */
 	private static String splashHTML(URL htmlURL) throws IOException {
 		BufferedReader in = new BufferedReader(new InputStreamReader(htmlURL.openStream()));
 		String line;
@@ -536,6 +576,9 @@ public class SplitPane extends JFrame{
 		}
 	}
 	
+	/*
+	 * Tree selector implementation
+	 */
 	private class Selector implements TreeSelectionListener {
 		public void valueChanged(TreeSelectionEvent e) {
 
@@ -549,7 +592,7 @@ public class SplitPane extends JFrame{
 			if (node == null) 
 				return;
 			
-			NodeNameGenerator gen = new NodeNameGenerator(header_subheaderNames);
+			NodeNameGenerator gen = new NodeNameGenerator(headerSubheaderNames);
 			String nodeName = gen.generator(node);
 			
 			String htmlfileName = null;
@@ -568,10 +611,11 @@ public class SplitPane extends JFrame{
 					searchBar.removeItemAt(5);
 				}
 			} else {
+				// making sure not to open up nonexisting html files for folders with names "Methods" and "Fields"
 				if(!node.isRoot() 
 						&& !node.toString().equals("Methods") 
 						&& !node.toString().equals("Fields")
-						&& !header_subheaderNames.contains(node.toString())) {
+						&& !headerSubheaderNames.contains(node.toString())) {
 					setFile(nodeName, node.toString());
 					
 					searchBar.insertItemAt(node, 0);
@@ -584,12 +628,9 @@ public class SplitPane extends JFrame{
 		}
 	}
 	
-	private class SelectFocus extends FocusAdapter {
-		public void focusGained(FocusEvent evt) {
-
-		}
-	}
-	
+	/*
+	 * Closing all open rows 
+	 */
 	private void collapseAll(JTree tree) {
 		treeModel.setRoot(Root);
 		tree.setModel(treeModel);
@@ -608,6 +649,7 @@ public class SplitPane extends JFrame{
 	}
 	
 	/*
+	 * To make tree unclickable before pressing the Search Button
 	 * https://stackoverflow.com/questions/10985734/java-swing-enabling-disabling-all-components-in-jpanel
 	 * Andrew Thompson
 	 */
@@ -621,6 +663,9 @@ public class SplitPane extends JFrame{
 		}
 	}
 
+	/*
+	 * Document listener that listens to key stroke changes and filters tree accordingly
+	 */
 	private class DocListener implements DocumentListener {
 		public void insertUpdate(DocumentEvent e) {
 			filterTree(((JTextField) searchBar.getEditor().getEditorComponent()).getText());

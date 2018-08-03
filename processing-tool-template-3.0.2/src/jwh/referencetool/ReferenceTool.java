@@ -1,7 +1,7 @@
 /**
- * you can put a one sentence description of your tool here.
+ * A built-in reference Tool for the PDE.
  *
- * ##copyright##
+ * Copyright (c) 2018 Jae Won Hyun
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,9 +18,9 @@
  * Free Software Foundation, Inc., 59 Temple Place, Suite 330,
  * Boston, MA  02111-1307  USA
  *
- * @author   ##author##
- * @modified ##date##
- * @version  ##tool.prettyVersion##
+ * @author   Jae Hyun
+ * @modified August 3rd, 2018
+ * @version  1.0.0
  */
 
 package jwh.referencetool;
@@ -28,9 +28,6 @@ package jwh.referencetool;
 import processing.app.Base;
 import processing.app.tools.Tool;
 import processing.app.ui.Editor;
-
-// when creating a tool, the name of the main class which implements Tool must
-// be the same as the value defined for project.name in your build.properties
 
 public class ReferenceTool implements Tool {
   Base base;

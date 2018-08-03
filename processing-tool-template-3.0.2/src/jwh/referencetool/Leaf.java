@@ -22,7 +22,7 @@ public class Leaf {
 		leaf = new DefaultMutableTreeNode(leafInput);
 	}
 	
-	public void add_leafMethods(ArrayList<DefaultMutableTreeNode> inputlist) {
+	public void addLeafMethods(ArrayList<DefaultMutableTreeNode> inputlist) {
 		methods = new DefaultMutableTreeNode("Methods");
 		for(DefaultMutableTreeNode leafMethod : inputlist) {
 			leafMethods.add(leafMethod);
@@ -35,7 +35,7 @@ public class Leaf {
 		leaf.add(methods);
 	}
 	
-	public void add_leafFields(ArrayList<DefaultMutableTreeNode> inputlist) {
+	public void addLeafFields(ArrayList<DefaultMutableTreeNode> inputlist) {
 		fields = new DefaultMutableTreeNode("Fields");
 		
 		for(DefaultMutableTreeNode leafField : inputlist) {
@@ -49,15 +49,7 @@ public class Leaf {
 		leaf.add(fields);
 	}
 	
-	public DefaultMutableTreeNode get_leaf() {
+	public DefaultMutableTreeNode getLeaf() {
 		return leaf;
-	}
-	
-	public ArrayList<DefaultMutableTreeNode> get_leafMethods() {
-		return leafMethods;
-	}
-	
-	public ArrayList<DefaultMutableTreeNode> get_leafFields() {
-		return leafFields;
 	}
 }

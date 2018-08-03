@@ -5,12 +5,15 @@ import java.util.*;
 import java.io.*;
 
 public class NodeNameGenerator {
-	HashSet<String> header_subheaderNames;
+	HashSet<String> headerSubHeaderNames;
 	
-	public NodeNameGenerator(HashSet<String> header_subheaderNames) {
-		this.header_subheaderNames = header_subheaderNames;
+	public NodeNameGenerator(HashSet<String> headerSubHeaderNames) {
+		this.headerSubHeaderNames = headerSubHeaderNames;
 	}
 	
+	/*
+	 * Generates the actual names of the Nodes in order to locate the matching html file.
+	 */
 	public String generator(DefaultMutableTreeNode node) {
 		String nodeName = node.toString();
 		
@@ -42,7 +45,7 @@ public class NodeNameGenerator {
 			if(!node.isRoot() 
 					&& !node.toString().equals("Methods") 
 					&& !node.toString().equals("Fields")
-					&& !header_subheaderNames.contains(node.toString())) {
+					&& !headerSubHeaderNames.contains(node.toString())) {
 				nodeName = nodeName.replaceAll("[^a-zA-Z0-9_]", "");
 				nodeName = nodeName.replaceAll("\\s+", "");
 			}

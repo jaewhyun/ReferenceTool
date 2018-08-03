@@ -23,7 +23,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
-public class setHTML extends JEditorPane {
+public class SetHTML extends JEditorPane {
 	HTMLEditorKit editorkit;
 	StyleSheet css = new StyleSheet();
 	String name = "";
@@ -33,28 +33,30 @@ public class setHTML extends JEditorPane {
 	String constructor = "";
 
 	ArrayList<String> parameterNames = new ArrayList<String>();
+	ArrayList<String> parameterDescs = new ArrayList<String>();
 	ArrayList<String> methodNames = new ArrayList<String>();
 	ArrayList<String> methodDescs = new ArrayList<String>();
 	ArrayList<String> fieldNames = new ArrayList<String>();
 	ArrayList<String> fieldDescs = new ArrayList<String>();
-	ArrayList<String> parameterDescs = new ArrayList<String>();
 	ArrayList<String> exampleImages = new ArrayList<String>();
 	ArrayList<String> exampleCodes = new ArrayList<String>();
+	
 	HashMap<String, ArrayList<String>> mapofCodes = new HashMap<String, ArrayList<String>>();
 	HashMap<String, String> searchAllDescriptions = new HashMap<String, String>();
 	HashMap<String, String> searchAllExamples = new HashMap<String, String>();
 	ArrayList<String> related = new ArrayList<String>();
+	
 	HashMap<String, String> savedHTML = new HashMap<String, String>();
 	
-	public setHTML() {
-		this.setContentType("text/html");
+	public SetHTML() {
+		super.setContentType("text/html");
 		editorkit = new PreWrapHTMLEditorKit();
 		css = editorkit.getStyleSheet();
 		setCSS();
 		editorkit.setAutoFormSubmission(false);
-		this.setEditorKit(editorkit);
+		super.setEditorKit(editorkit);
 		
-		this.addHyperlinkListener(new HyperlinkListener() {
+		super.addHyperlinkListener(new HyperlinkListener() {
 			@Override
 			public void hyperlinkUpdate(HyperlinkEvent e) {
 				if(e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
@@ -71,11 +73,15 @@ public class setHTML extends JEditorPane {
 		css.addRule(".sectionheaderStyle {width : 70px; valign: top}");
 	}
 	
+	/*
+	 * Reading through all Processing html files and saving them into a hashmap for later reference
+	 */
 	public void parseHTML(URL urlLink, String nodeName, boolean initiated, boolean searchAll, String searchText) {
+		// after everything has been read in (initiated) and Search All has been chosen
 		if(savedHTML.containsKey(nodeName) && initiated && searchAll && !searchText.equals("")) {
 			String saved = savedHTML.get(nodeName);
 			
-			this.setText(savedHTML.get(nodeName));
+			// filter for words that may cause weird color change
 			if(searchText.equals("or")
 					|| searchText.equals("for")
 					|| searchText.equals("and")
@@ -88,19 +94,22 @@ public class setHTML extends JEditorPane {
 				searchText = " " + searchText + " ";
 			}
 			
+			// match for words that may have different upper + lower case combinations - arrayList, ArrayList, ARRAYLIST, arraylist
 			String find = "((?i)"+searchText+")";
 			Pattern pattern = Pattern.compile(find);
 			Matcher matcher = pattern.matcher(saved);
 			if(matcher.find()) {
 				String found = matcher.group(1);
+				// change font color to blue
 				saved = saved.replace(matcher.group(1), "<font color=\"#db4730\">"+matcher.group(1)+"</font>");
 			}
 			
 			this.setText(saved);
+			// set scrollbar to the top
 			this.setCaretPosition(0);
 			
 			
-			// will come back to this later - for now highlighter does not work even though it finds the right words
+// 		will come back to this later - for now highlighter does not work even though it finds the right words
 //			Highlighter.HighlightPainter painter = new DefaultHighlighter.DefaultHighlightPainter(Color.ORANGE);
 //			int offset = saved.indexOf(searchText);
 //			int length = searchText.length();
@@ -114,18 +123,23 @@ public class setHTML extends JEditorPane {
 //					ble.printStackTrace();
 //				}
 //			}
-			
+		
+		// already initiated and contains codeName but isn't for Search All	
 		} else if(savedHTML.containsKey(nodeName) && initiated) {
 			this.setText(savedHTML.get(nodeName));
 			this.setCaretPosition(0);
+			
+		// for the very beginning when all the reference html files are being read in 
 		} else {
+			// make sure methods and fields aren't being parsed through regex
 			if(!nodeName.equals("Methods") && !nodeName.equals("Fields")) {
+				// set parsed strings
 				RegEx regexer = new RegEx(urlLink);
 				name = regexer.parseName();
 
 				regexer.parseExamples();
-				exampleImages = regexer.get_exampleImages();
-				exampleCodes = regexer.get_exampleCodes();
+				exampleImages = regexer.getExampleImages();
+				exampleCodes = regexer.getExampleCodes();
 				if(!mapofCodes.containsKey(nodeName)) {
 					mapofCodes.put(nodeName, exampleCodes);
 					StringBuilder sb = new StringBuilder();
@@ -144,16 +158,16 @@ public class setHTML extends JEditorPane {
 				}
 				
 				regexer.parseParameters();
-				parameterNames = regexer.get_parameterNames();
-				parameterDescs = regexer.get_parameterDescs();
+				parameterNames = regexer.getParameterNames();
+				parameterDescs = regexer.getParameterDescs();
 
 				regexer.parseMethods();
-				methodNames = regexer.get_methodNames();
-				methodDescs = regexer.get_methodDescs();
+				methodNames = regexer.getMethodNames();
+				methodDescs = regexer.getMethodDescs();
 				
 				regexer.parseFields();
-				fieldNames = regexer.get_fieldNames();
-				fieldDescs = regexer.get_fieldDescs();
+				fieldNames = regexer.getFieldNames();
+				fieldDescs = regexer.getFieldDescs();
 				
 				syntax = regexer.parseSyntax();
 				returns = regexer.parseReturns();
@@ -166,23 +180,26 @@ public class setHTML extends JEditorPane {
 		}
 	}
 	
-	public HashMap<String, ArrayList<String>> get_mapofCodes() {
+	public HashMap<String, ArrayList<String>> getMapofCodes() {
 		return mapofCodes;
 	}
 	
-	public HashMap<String, String> get_searchAllExamples() {
+	public HashMap<String, String> getSearchAllExamples() {
 		return searchAllExamples;
 	}
 	
-	public HashMap<String, String> get_searchAllDescriptions() {
+	public HashMap<String, String> getSearchAllDescriptions() {
 		return searchAllDescriptions;
 	}
 	
-	public HashMap<String, String> get_savedHTML() {
+	public HashMap<String, String> getSavedHTML() {
 		return savedHTML;
 	}
 	
-	public void fillIn(URL urllink, String nodeName) {
+	/*
+	 * Putting all html strings together and saving it in the hashmap for later reference
+	 */
+	private void fillIn(URL urllink, String nodeName) {
 		String finalexampleString = exampleString(urllink);
 		String descriptionString = descriptionString();
 		String syntaxString = syntaxString();
@@ -201,17 +218,18 @@ public class setHTML extends JEditorPane {
 				+ "</table>";
 		
 		String total = namestring + finalexampleString + descriptionString + fieldString + methodString + syntaxString + constructorString + parameterString + returnString + relatedString;
-//		System.out.println(total);
 		total = total.replace("<<", "&lt;&lt;");
 		total = total.replaceAll(" *< ", " &lt ");
 		total = total.replaceAll(" *<= ", " &lt;= ");
-//		this.setText(total);
 		if(!savedHTML.containsKey(nodeName)) {
 			savedHTML.put(nodeName, total);
 		}
 	}
 	
-	public String exampleString(URL urllink) {
+	/*
+	 * html string for Examples
+	 */
+	private String exampleString(URL urllink) {
 		String hr = "<tr valign=\"top\"><td class=\"widthStyle\">&nbsp;</td><td><hr></td></tr>";
 		String examples = "";
 		String finalexampleString = "<table class=\"sectionStyle\">" 
@@ -243,6 +261,7 @@ public class setHTML extends JEditorPane {
 				String returnCode = "";
 				returnCode = exampleCodes.get(i).trim();
 				
+				// trying to syntax highlight for comments 
 				String codeLines[] = returnCode.split("\\r?\\n");
 				for(int j = 0; j < codeLines.length; j++) {
 					if(codeLines[j].contains("//") 
@@ -258,6 +277,8 @@ public class setHTML extends JEditorPane {
 					
 					if(codeLines[j].contains("/*") || codeLines[j].contains("/**")) {
 						codeLines[j] = codeLines[j].replace("/*", "<span style=\"color: #5a7aad\">/*");
+						
+						// * this part not quite working * 
 						if(codeLines[j].contains("\\*+\\/")) {
 							codeLines[j] = codeLines[j].replace("\\*+\\/", "*/</span>");
 						}	
@@ -287,6 +308,7 @@ public class setHTML extends JEditorPane {
 			if(nomoreImages == false) {
 				finalexampleString = finalexampleString + "</table>";
 			} else {
+				// if examples contain images only for some 
 				String allcode = "";
 				for(int i = 0; i < nomoreImagesCode.size(); i++) {
 					allcode = allcode + nomoreImagesCode.get(i);
@@ -304,7 +326,10 @@ public class setHTML extends JEditorPane {
 		return finalexampleString;
 	}
 	
-	public String descriptionString() {
+	/*
+	 * html string for Description
+	 */
+	private String descriptionString() {
 		String descriptionstring = "<table class=\"sectionStyle\"><tr valign=\"top\"><td class=\"widthStyle\"><u>Description</u></td><td>";
 		
 		descriptionstring = descriptionstring + description + "</td></tr></table>";
@@ -312,7 +337,10 @@ public class setHTML extends JEditorPane {
 		return descriptionstring;
 	}
 	
-	public String syntaxString() {
+	/*
+	 * html string for Syntax
+	 */
+	private String syntaxString() {
 		String syntaxstring = "<table class=\"sectionStyle\"><tr valign=\"top\"><td class=\"widthStyle\"><u>Syntax</u></td><pre >";
 		
 		if(!syntax.equals("")) {
@@ -327,7 +355,10 @@ public class setHTML extends JEditorPane {
 		return syntaxstring;
 	}
 	
-	public String constructorString() {
+	/*
+	 * html string for Constructor
+	 */
+	private String constructorString() {
 		String constructorstring = "<table class=\"sectionStyle\"><tr valign=\"top\"><td class=\"widthStyle\"><u>Constructor</u></td>";
 		
 		if(!constructor.equals("")) {
@@ -340,7 +371,10 @@ public class setHTML extends JEditorPane {
 		
 	}
 	
-	public String parameterString() {
+	/*
+	 * html string for Parameters
+	 */
+	private String parameterString() {
 		String parameterstring = "<table class=\"sectionStyle\"><tr valign=\"top\"><td class=\"widthStyle\"><u>Parameters</u></td>";
 		String finalparamstring = "";
 		if(parameterNames.size() != 0) {
@@ -363,7 +397,10 @@ public class setHTML extends JEditorPane {
 		return finalparamstring;
 	}
 	
-	public String returnString() {
+	/*
+	 * html string for Returns
+	 */
+	private String returnString() {
 		String returnstring = "";
 		if(!returns.equals("")) {
 			returnstring = "<table class=\"sectionStyle\"><tr valign=\"top\"><td class=\"widthStyle\"><u>Returns</u></td><td>"+returns+"</td></tr></table>";
@@ -372,7 +409,10 @@ public class setHTML extends JEditorPane {
 		return returnstring;
 	}
 	
-	public String relatedString() {
+	/*
+	 * html string for Relatd
+	 */
+	private String relatedString() {
 		String relatedstring = "<table class=\"sectionStyle\"><tr valign=\"top\"><td class=\"widthStyle\"><u>Related</u></td>";
 		String finalrelatedstring = "";
 		
@@ -395,7 +435,10 @@ public class setHTML extends JEditorPane {
 		return finalrelatedstring;
 	}
 	
-	public String methodString() {
+	/*
+	 *  html string for Methods
+	 */
+	private String methodString() {
 		String methodstring = "<table class=\"sectionStyle\"><tr valign=\"top\"><td class=\"widthStyle\"><u>Methods</u></td>";
 		String finalmethodstring = "";
 		if(methodNames.size() != 0) {
@@ -418,7 +461,10 @@ public class setHTML extends JEditorPane {
 		return finalmethodstring;
 	}
 	
-	public String fieldString() {
+	/*
+	 * html string for Fields
+	 */
+	private String fieldString() {
 		String fieldstring = "<table class=\"sectionStyle\"><tr valign=\"top\"><td class=\"widthStyle\"><u>Fields</u></td>";
 		String finalfieldstring = "";
 		if(fieldNames.size() != 0) {
@@ -441,7 +487,10 @@ public class setHTML extends JEditorPane {
 		return finalfieldstring;
 	}
 	
-	public void handleLink(String link){
+	/*
+	 * handling hyperlink
+	 */
+	private void handleLink(String link){
 		try {
 			openthislink(link);
 		} catch(Exception e) {
@@ -449,7 +498,7 @@ public class setHTML extends JEditorPane {
 		}
 	}
 	
-	public void openthislink(String url) throws Exception {
+	private void openthislink(String url) throws Exception {
 		Desktop.getDesktop().browse(new URI(url));
 	}
 }

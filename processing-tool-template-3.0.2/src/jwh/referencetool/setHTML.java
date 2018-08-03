@@ -97,6 +97,7 @@ public class setHTML extends JEditorPane {
 			}
 			
 			this.setText(saved);
+			this.setCaretPosition(0);
 			
 			
 			// will come back to this later - for now highlighter does not work even though it finds the right words
@@ -116,6 +117,7 @@ public class setHTML extends JEditorPane {
 			
 		} else if(savedHTML.containsKey(nodeName) && initiated) {
 			this.setText(savedHTML.get(nodeName));
+			this.setCaretPosition(0);
 		} else {
 			if(!nodeName.equals("Methods") && !nodeName.equals("Fields")) {
 				RegEx regexer = new RegEx(urlLink);

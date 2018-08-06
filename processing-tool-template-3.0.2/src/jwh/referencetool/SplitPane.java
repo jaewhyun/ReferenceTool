@@ -24,7 +24,6 @@ public class SplitPane extends JFrame{
 	Editor editor;
 	Base base;
 	DefaultTreeModel treeModel;
-	Font font;
 	SetHTML htmlPane = new SetHTML();
 	DefaultMutableTreeNode Root;
 	JTree tree;
@@ -156,7 +155,7 @@ public class SplitPane extends JFrame{
 		
 		leftscrollPane = new JScrollPane(tree);
 		rightscrollPane = new JScrollPane(htmlPane);
-		htmlPane.setFont(font);
+		htmlPane.setFont(htmlfont);
 
 		rightpanel.add(rightscrollPane, BorderLayout.CENTER);
 		

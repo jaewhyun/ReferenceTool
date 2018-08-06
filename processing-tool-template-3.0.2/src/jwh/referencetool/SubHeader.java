@@ -10,26 +10,18 @@ public class SubHeader {
 	public SubHeader(String subheaderInput) {
 		subHeader = new DefaultMutableTreeNode(subheaderInput);
 	}
-	
-	public void set_leaves(ArrayList<Leaf> leavesinput) {
-		leaves = leavesinput;
-	}
-	
-	public void add_leaf(ArrayList<Leaf> inputlist) {
+
+	public void addLeaves(ArrayList<Leaf> inputlist) {
 		for(Leaf currentleaf : inputlist) {
 			leaves.add(currentleaf);
 		}
 		
 		for(Leaf currentLeaf : leaves) {
-			subHeader.add(currentLeaf.get_leaf());
+			subHeader.add(currentLeaf.getLeaf());
 		}
 	}
 	
-	public DefaultMutableTreeNode get_subHeader() {
+	public DefaultMutableTreeNode getSubHeader() {
 		return subHeader;
-	}
-	
-	public ArrayList<Leaf> get_leaves() {
-		return leaves;
 	}
 }

@@ -14,51 +14,47 @@ public class Header {
 		header = new DefaultMutableTreeNode(headerName);
 	}
 	
-	public void set_misc(int numInput) {
+	public void setMisc(int numInput) {
 		misc = numInput;
 	}
 	
-	public void set_numberofSubHeaders(Integer numInput) {
+	public void setNumberofSubHeaders(Integer numInput) {
 		numberofSubHeaders = numInput;
 	}
-//	
-	public void set_subHeader_Number(LinkedHashMap<SubHeader, Integer> hashmapInput) {
+
+	public void setSubHeaderNumber(LinkedHashMap<SubHeader, Integer> hashmapInput) {
 		subHeader_Number =  hashmapInput;
 	}
 	
-	public int get_misc() {
+	public int getMisc() {
 		return misc;
 	}
 	
-	public DefaultMutableTreeNode get_header() {
+	public DefaultMutableTreeNode getHeader() {
 		return header;
 	}
 	
-	public Integer get_numberofSubHeaders() {
+	public Integer getNumberofSubHeaders() {
 		return numberofSubHeaders;
 	}
 	
-	public void add_miscLeaves(Leaf newleaf) {
+	public void addMiscLeaves(Leaf newleaf) {
 		leaves.add(newleaf);
 	}
 	
-	public void connect_nodes() {
+	public void connectNodes() {
 		for(Leaf currentleaf : leaves) {
-			header.add(currentleaf.get_leaf());
+			header.add(currentleaf.getLeaf());
 		}
 	}
 	
-	public LinkedHashMap<SubHeader, Integer> get_subHeader_Number() {
+	public LinkedHashMap<SubHeader, Integer> getSubHeaderNumber() {
 		return subHeader_Number;
 	}
 	
-	public void add_subHeaders() {
+	public void addSubHeaders() {
 		for(SubHeader subHeader : subHeader_Number.keySet()) {
-			header.add(subHeader.get_subHeader());
+			header.add(subHeader.getSubHeader());
 		}
-	}
-	
-	public ArrayList<Leaf> get_miscLeaves() {
-		return leaves;
 	}
 }

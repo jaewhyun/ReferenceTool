@@ -34,6 +34,7 @@ public class SplitPane extends JFrame{
 	JTextArea textArea = new JTextArea();
 	JButton reset;
 	JButton search;
+	JButton removeFilter;
 	JCheckBox searchAll;
 	boolean mustSearchAll = false;
 	boolean initiated = false;
@@ -136,9 +137,11 @@ public class SplitPane extends JFrame{
 		buttonCheckPanel.add(search);
 		
 		// establishing the search bar and its layout
+		searchBar = new JComboBox<DefaultMutableTreeNode>();
 		JPanel savedSearchesPanel = new JPanel();
 		savedSearchesPanel.setLayout(new BoxLayout(savedSearchesPanel, BoxLayout.LINE_AXIS));
-		searchBar = new JComboBox<DefaultMutableTreeNode>();
+		savedSearchesPanel.add(searchBar);
+
 		searchBar.setEditable(true);
 		searchBar.setMaximumRowCount(5);
 		searchBar.addActionListener(new ActionListener() {
@@ -149,9 +152,58 @@ public class SplitPane extends JFrame{
 				((JTextField) searchBar.getEditor().getEditorComponent()).selectAll();
 			}
 		});
+		
+		// processing/app/src/processing/contrib/ContributionTab.java
+		// lines 351 - 403
+		JLabel filterLabel = new JLabel("<html><font color='gray'>Search</font></html>");
+		filterLabel.setOpaque(false);
+		filterLabel.setIcon(Toolkit.getLibIconX("manager/search"));
+		removeFilter = Toolkit.createIconButton("manager/remove");
+		removeFilter.setBorder(BorderFactory.createEmptyBorder(0,0,0,2));
+		removeFilter.setBorderPainted(false);
+		removeFilter.setContentAreaFilled(false);
+		removeFilter.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				((JTextField) searchBar.getEditor().getEditorComponent()).setText("");
+				searchBar.requestFocusInWindow();
+			}
+		});
+		
+		removeFilter.setVisible(false);
+		
+		searchBar.setOpaque(false);
+		
+		GroupLayout fl = new GroupLayout((JTextField) searchBar.getEditor().getEditorComponent());
+		((JTextField) searchBar.getEditor().getEditorComponent()).setLayout(fl);
+		fl.setHorizontalGroup(fl.createSequentialGroup()
+								.addComponent(filterLabel)
+								.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED,
+				                         GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
+								.addComponent(removeFilter));
+		
+		fl.setVerticalGroup(fl.createSequentialGroup()
+                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED,
+                                 GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
+                .addGroup(fl.createParallelGroup()
+                .addComponent(filterLabel)
+                .addComponent(removeFilter))
+                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED,
+                                 GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE));
+		
+		((JTextField) searchBar.getEditor().getEditorComponent()).addFocusListener(new FocusListener() {
+			public void focusLost(FocusEvent focusEvent) {
+				if(((JTextField) searchBar.getEditor().getEditorComponent()).getText().isEmpty()) {
+					filterLabel.setVisible(true);
+				}
+			}
+			public void focusGained(FocusEvent focusEvent) {
+				filterLabel.setVisible(false);
+			}
+		});
+		
 		((JTextField) searchBar.getEditor().getEditorComponent()).getDocument().addDocumentListener(new DocListener());
 		((JTextField) searchBar.getEditor().getEditorComponent()).getDocument().putProperty("term", "Search");
-		savedSearchesPanel.add(searchBar);
+		
 		
 		leftscrollPane = new JScrollPane(tree);
 		rightscrollPane = new JScrollPane(htmlPane);
@@ -670,13 +722,14 @@ public class SplitPane extends JFrame{
 			filterTree(((JTextField) searchBar.getEditor().getEditorComponent()).getText());
 			enableComponents(leftscrollPane, false);
 			search.setEnabled(true);
+			removeFilter.setVisible(!((JTextField) searchBar.getEditor().getEditorComponent()).getText().isEmpty());
 		}
 		
 		public void removeUpdate(DocumentEvent e) {
 			filterTree(((JTextField) searchBar.getEditor().getEditorComponent()).getText());
 			enableComponents(leftscrollPane, false);
 			search.setEnabled(true);
-			
+			removeFilter.setVisible(!((JTextField) searchBar.getEditor().getEditorComponent()).getText().isEmpty());
 			if(((JTextField) searchBar.getEditor().getEditorComponent()).getText().equals("")) {
 				enableComponents(leftscrollPane, true);
 			}

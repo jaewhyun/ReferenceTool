@@ -60,8 +60,8 @@ public class SetHTML extends JEditorPane {
 			@Override
 			public void hyperlinkUpdate(HyperlinkEvent e) {
 				if(e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-				handleLink(e.getURL().toExternalForm());
-					}
+					handleLink(e.getURL().toExternalForm());
+				}
 			}
 		});
 	}
@@ -175,7 +175,7 @@ public class SetHTML extends JEditorPane {
 				constructor = regexer.parseConstructor();
 				related = regexer.parseRelated();
 
-				fillIn(urlLink, nodeName);
+				fillIn(nodeName);
 			}
 		}
 	}
@@ -199,8 +199,8 @@ public class SetHTML extends JEditorPane {
 	/*
 	 * Putting all html strings together and saving it in the hashmap for later reference
 	 */
-	private void fillIn(URL urllink, String nodeName) {
-		String finalexampleString = exampleString(urllink);
+	private void fillIn(String nodeName) {
+		String finalexampleString = exampleString();
 		String descriptionString = descriptionString();
 		String syntaxString = syntaxString();
 		String parameterString = parameterString();
@@ -229,7 +229,7 @@ public class SetHTML extends JEditorPane {
 	/*
 	 * html string for Examples
 	 */
-	private String exampleString(URL urllink) {
+	private String exampleString() {
 		String hr = "<tr valign=\"top\"><td class=\"widthStyle\">&nbsp;</td><td><hr></td></tr>";
 		String examples = "";
 		String finalexampleString = "<table class=\"sectionStyle\">" 

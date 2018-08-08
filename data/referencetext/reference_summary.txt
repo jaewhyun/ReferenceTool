@@ -1,0 +1,125 @@
+Structure
+37
+0
+Environment
+18
+0
+Data
+0
+5
+Primitive
+8
+Composite
+16
+Conversion
+10
+String Functions
+10
+Array Functions
+9
+Control
+0
+4
+Relational Operators
+6
+Iteration
+2
+Conditionals
+8
+Logical Operators
+3
+Shape
+3
+6
+2D Primitives
+7
+Curves
+9
+3D Primitives
+3
+Attributes
+5
+Vertex
+8
+Loading and Displaying
+2
+Input
+0
+4
+Mouse
+12
+Keyboard
+6
+Files
+15
+Time and Date
+7
+Output
+0
+3
+TextArea
+3
+Image
+2
+Files
+15
+Transform
+13
+0
+Camera
+0
+4
+Lights
+9
+Camera
+8
+Coordinates
+6
+Material Properties
+4
+Color
+0
+2
+Setting
+7
+Creating and Reading
+9
+Image
+2
+3
+Loading and Displaying
+6
+Textures
+3
+Pixels
+8
+Rendering
+5
+1
+Shaders
+4
+Typography
+1
+3
+Loading and Displaying
+4
+Attributes
+5
+Metrics
+2
+Math
+1
+5
+Operators
+11
+Bitwise Operators
+4
+Calculation
+17
+Trigonometry
+9
+Random
+6
+Constants
+5
+0

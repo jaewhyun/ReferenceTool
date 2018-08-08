@@ -36,6 +36,7 @@ public class SplitPane extends JFrame{
 	JTextArea textArea = new JTextArea();
 	JButton reset;
 	JButton search;
+	JLabel filterLabel;
 	JButton removeFilter;
 	JCheckBox searchAll;
 	boolean mustSearchAll = false;
@@ -111,6 +112,8 @@ public class SplitPane extends JFrame{
 				searchAll.setSelected(false);
 				mustSearchAll = false;
 				((JTextField) searchBar.getEditor().getEditorComponent()).setText("");
+				filterLabel.setVisible(true);
+				removeFilter.setVisible(false);
 				htmlPane.setText(splashhtml);
 				search.setEnabled(false);
 				if(panel != null) {
@@ -118,8 +121,6 @@ public class SplitPane extends JFrame{
 					panel.revalidate();
 				}
 				enableComponents(leftscrollPane, true);
-
-				((JTextField) searchBar.getEditor().getEditorComponent()).setText("");
 			}
 		});
 	
@@ -162,7 +163,7 @@ public class SplitPane extends JFrame{
 		
 		// processing/app/src/processing/contrib/ContributionTab.java
 		// lines 351 - 403
-		JLabel filterLabel = new JLabel("<html><font color='gray'>Search</font></html>");
+		filterLabel = new JLabel("<html><font color='gray'>Search</font></html>");
 		filterLabel.setOpaque(false);
 		filterLabel.setIcon(Toolkit.getLibIconX("manager/search"));
 		removeFilter = Toolkit.createIconButton("manager/remove");
@@ -208,9 +209,7 @@ public class SplitPane extends JFrame{
 			}
 		});
 		
-		((JTextField) searchBar.getEditor().getEditorComponent()).getDocument().addDocumentListener(new DocListener());
-		((JTextField) searchBar.getEditor().getEditorComponent()).getDocument().putProperty("term", "Search");
-		
+		((JTextField) searchBar.getEditor().getEditorComponent()).getDocument().addDocumentListener(new DocListener());		
 		
 		leftscrollPane = new JScrollPane(tree);
 		rightscrollPane = new JScrollPane(htmlPane);

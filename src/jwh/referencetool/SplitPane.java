@@ -5,6 +5,7 @@ import java.util.*;
 import java.awt.*;
 import java.awt.List;
 import java.awt.event.*;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 import javax.swing.*;
@@ -13,6 +14,7 @@ import javax.swing.tree.*;
 
 import processing.app.exec.SystemOutSiphon;
 import processing.app.Base;
+import processing.app.Platform;
 import processing.app.tools.Tool;
 import processing.app.ui.Editor;
 import processing.app.ui.Toolkit;
@@ -116,6 +118,8 @@ public class SplitPane extends JFrame{
 					panel.revalidate();
 				}
 				enableComponents(leftscrollPane, true);
+
+				((JTextField) searchBar.getEditor().getEditorComponent()).setText("");
 			}
 		});
 	
@@ -148,10 +152,13 @@ public class SplitPane extends JFrame{
 			public void actionPerformed(ActionEvent e) {
 				int selStart = textArea.getSelectionStart();
 				int selEnd = textArea.getSelectionEnd();
-				textArea.replaceRange(searchBar.getSelectedItem().toString(), selStart, selEnd);
-				((JTextField) searchBar.getEditor().getEditorComponent()).selectAll();
+				if(searchBar.getSelectedItem() != null) {
+					textArea.replaceRange(searchBar.getSelectedItem().toString(), selStart, selEnd);
+					((JTextField) searchBar.getEditor().getEditorComponent()).selectAll();
+				}
 			}
 		});
+		
 		
 		// processing/app/src/processing/contrib/ContributionTab.java
 		// lines 351 - 403
@@ -588,18 +595,63 @@ public class SplitPane extends JFrame{
 			String htmlfileName = "";
 			NodeNameGenerator gen = new NodeNameGenerator(headerSubheaderNames);
 			nodeName = gen.generator(node);
+			if(nodeName.equals("color")) {
+				nodeName = nodeName + "_datatype";
+			}
 			
 			if(node.isLeaf()) {
-				htmlfileName = "/data/reference/" + nodeName + ".html";
-				java.net.URL htmlURL = getClass().getResource(htmlfileName);
+				htmlfileName = "modes/java/reference/"+nodeName+".html";
+				File htmlfile = Platform.getContentFile(htmlfileName);
+				java.net.URL htmlURL = null;
+				if(htmlfile.exists()) {
+					try {
+						htmlURL = htmlfile.toURI().toURL();
+					} catch (MalformedURLException malE) {
+						malE.printStackTrace();
+					} 
+				} else {
+					nodeName = nodeName.substring(0, nodeName.length()-1);
+					nodeName = nodeName + "convert_";
+					htmlfileName = "modes/java/reference/" + nodeName + ".html";
+					htmlfile = Platform.getContentFile(htmlfileName);
+					if(htmlfile.exists()) {
+						try {
+							htmlURL = htmlfile.toURI().toURL();
+						} catch (MalformedURLException malE) {
+							malE.printStackTrace();
+						} 
+					} 
+				}
+
 				htmlPane.parseHTML(htmlURL, nodeName, initiated, false, "");
 			} else {
 				if(!node.isRoot() 
 						&& !node.toString().equals("Methods") 
 						&& !node.toString().equals("Fields")
 						&& !headerSubheaderNames.contains(node.toString())) {
-					htmlfileName = "/data/reference/" + nodeName + ".html";
-					java.net.URL htmlURL = getClass().getResource(htmlfileName);
+					htmlfileName = "modes/java/reference/" + nodeName + ".html";
+					File htmlfile = Platform.getContentFile(htmlfileName);
+					java.net.URL htmlURL = null;
+					if(htmlfile.exists()) {
+						try {
+							htmlURL = htmlfile.toURI().toURL();
+						} catch (MalformedURLException malE) {
+							malE.printStackTrace();
+						}
+					} else {
+						nodeName = nodeName.substring(0, nodeName.length()-1);
+						nodeName = nodeName + "convert_";
+						htmlfileName = "modes/java/reference/" + nodeName + ".html";
+						htmlfile = Platform.getContentFile(htmlfileName);
+						if(htmlfile.exists()) {
+							try {
+								htmlURL = htmlfile.toURI().toURL();
+							} catch (MalformedURLException malE) {
+								malE.printStackTrace();
+							} 
+						}
+					}
+
 					htmlPane.parseHTML(htmlURL, nodeName, initiated, false, "");
 				}
 			}
@@ -657,8 +709,7 @@ public class SplitPane extends JFrame{
 				setFile(nodeName, node.toString());
 				
 				searchBar.insertItemAt(node, 0);
-				
-				if(searchBar.getItemCount() > 5) {
+				if(searchBar.getItemCount() == 6) {
 					searchBar.removeItemAt(5);
 				}
 			} else {
@@ -670,8 +721,7 @@ public class SplitPane extends JFrame{
 					setFile(nodeName, node.toString());
 					
 					searchBar.insertItemAt(node, 0);
-					
-					if(searchBar.getItemCount() > 4) {
+					if(searchBar.getItemCount() == 6) {
 						searchBar.removeItemAt(5);
 					}
 				}

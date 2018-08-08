@@ -209,9 +209,7 @@ public class SplitPane extends JFrame{
 			}
 		});
 		
-		((JTextField) searchBar.getEditor().getEditorComponent()).getDocument().addDocumentListener(new DocListener());
-		((JTextField) searchBar.getEditor().getEditorComponent()).getDocument().putProperty("term", "Search");
-		
+		((JTextField) searchBar.getEditor().getEditorComponent()).getDocument().addDocumentListener(new DocListener());		
 		
 		leftscrollPane = new JScrollPane(tree);
 		rightscrollPane = new JScrollPane(htmlPane);

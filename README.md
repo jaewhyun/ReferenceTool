@@ -1,5 +1,6 @@
 ## Reference Tool
 [![Open Source Love svg1](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](https://github.com/ellerbrock/open-source-badges/)
+
 Reference Tool provides built-in references for the Processing Development Environment. All references can be searched by their name as well as for other references that contain examples or descriptions that contain the reference of interest. Online references can be found [**here**](https://www.processing.org/reference).
 
 ### Installation

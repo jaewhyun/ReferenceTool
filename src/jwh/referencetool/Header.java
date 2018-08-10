@@ -3,12 +3,23 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import java.io.*;
 import java.util.*;
 
+/*
+ * 
+ * Headers are bolded categories on https://www.processing.org/reference/
+ * This includes:
+ * 	 Structure, Environment, Data
+ * 	 Control, Shape, Input, Output
+ * 	 Transform, Lights and Camera, 
+ * 	 Color, Image, Rendering, 
+ * 	 Typography, Math, Constants
+ * 
+ */
 public class Header {
 	DefaultMutableTreeNode header;
 	int misc = 0;
 	Integer numberofSubHeaders = 0;
 	ArrayList<Leaf> leaves = new ArrayList<Leaf>();
-	LinkedHashMap<SubHeader, Integer> subHeader_Number = new LinkedHashMap<SubHeader, Integer>();
+	LinkedHashMap<SubHeader, Integer> subHeaderNumber = new LinkedHashMap<SubHeader, Integer>();
 	
 	public Header(String headerName) {
 		header = new DefaultMutableTreeNode(headerName);
@@ -23,7 +34,7 @@ public class Header {
 	}
 
 	public void setSubHeaderNumber(LinkedHashMap<SubHeader, Integer> hashmapInput) {
-		subHeader_Number =  hashmapInput;
+		subHeaderNumber =  hashmapInput;
 	}
 	
 	public int getMisc() {
@@ -49,11 +60,11 @@ public class Header {
 	}
 	
 	public LinkedHashMap<SubHeader, Integer> getSubHeaderNumber() {
-		return subHeader_Number;
+		return subHeaderNumber;
 	}
 	
 	public void addSubHeaders() {
-		for(SubHeader subHeader : subHeader_Number.keySet()) {
+		for(SubHeader subHeader : subHeaderNumber.keySet()) {
 			header.add(subHeader.getSubHeader());
 		}
 	}

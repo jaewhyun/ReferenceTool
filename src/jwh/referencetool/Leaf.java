@@ -1,9 +1,14 @@
 package jwh.referencetool;
 
 import java.util.ArrayList;
-
 import javax.swing.tree.DefaultMutableTreeNode;
 
+/*
+ * 
+ * Leaves are the references with the HTML files.
+ * Some Leaves have more children for their methods and fields references.
+ * 
+ */
 public class Leaf {
 	DefaultMutableTreeNode leaf;
 	DefaultMutableTreeNode methods = null;

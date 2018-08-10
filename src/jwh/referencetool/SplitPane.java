@@ -9,6 +9,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import javax.swing.*;
+import javax.swing.text.*;
 import javax.swing.event.*;
 import javax.swing.tree.*;
 
@@ -209,7 +210,8 @@ public class SplitPane extends JFrame{
 			}
 		});
 		
-		((JTextField) searchBar.getEditor().getEditorComponent()).getDocument().addDocumentListener(new DocListener());		
+		Document document = ((JTextField) searchBar.getEditor().getEditorComponent()).getDocument();
+		document.addDocumentListener(new DocListener());		
 		
 		leftscrollPane = new JScrollPane(tree);
 		rightscrollPane = new JScrollPane(htmlPane);
@@ -501,86 +503,7 @@ public class SplitPane extends JFrame{
 	public void handleClose() {
 		dispose();
 	}
-	
-	/**
-	 * This method is derived from the tree widget of Oliver Watkins.
-	 * ------------------------------------------------------------------------------------
-	 * 
-	 * Tree widget which allows the tree to be filtered on keystroke time. Only nodes who's
-	 * toString matches the search field will remain in the tree or its parents.
-	 *
-	 * Copyright (c) Oliver.Watkins
-	 */
-	/**
-	 *
-	 * @param text
-	 */
-	
-	private void filterTree(String text) {
-		String filteredText = text;
-		DefaultMutableTreeNode filteredRoot = copyNode(Root);
-		
-		if(text.trim().toString().equals("")) {
-			treeModel.setRoot(Root);
-			tree.setModel(treeModel);
 
-			tree.updateUI();
-	
-			leftscrollPane.getViewport().setView(tree);
-			
-			DefaultTreeCellRenderer renderer = (DefaultTreeCellRenderer) tree.getCellRenderer();
-			renderer.setLeafIcon(null);
-			renderer.setClosedIcon(null);
-			renderer.setOpenIcon(null);
-			
-			return;
-		} else {
-			HashMap<String, String> searchAllExamples = htmlPane.getSearchAllExamples();
-			HashMap<String, String> searchAllDescriptions = htmlPane.getSearchAllDescriptions();
-			HashMap<String, String> savedHTML = htmlPane.getSavedHTML();
-			
-			TreeNodeBuilder b = new TreeNodeBuilder(text, savedHTML, headerSubheaderNames, searchAllExamples, searchAllDescriptions);
-			
-			filteredRoot = b.prune((DefaultMutableTreeNode) filteredRoot.getRoot(), searchAll.isSelected());
-
-			treeModel.setRoot(filteredRoot);
-			
-			tree.setModel(treeModel);
-
-			tree.updateUI();
-	
-			leftscrollPane.getViewport().setView(tree);	
-
-		}
-		
-		for(int i = 0; i<tree.getRowCount(); i++) {
-			tree.expandRow(i);
-		}
-		
-		DefaultTreeCellRenderer renderer = (DefaultTreeCellRenderer) tree.getCellRenderer();
-		renderer.setLeafIcon(null);
-		renderer.setClosedIcon(null);
-		renderer.setOpenIcon(null);
-	
-		filtered = true;
-	}
-	
-	/*
-	 * Copyright (c) Oliver.Watkins
-	 */
-	private DefaultMutableTreeNode copyNode(DefaultMutableTreeNode orig) {
-		DefaultMutableTreeNode newOne = new DefaultMutableTreeNode();
-		newOne.setUserObject(orig.getUserObject());
-		Enumeration enm = orig.children();
-		
-		while(enm.hasMoreElements()) {
-			DefaultMutableTreeNode child = (DefaultMutableTreeNode) enm.nextElement();
-			newOne.add(copyNode(child));
-		}
-		
-		return newOne;
-	}
-	
 	/*
 	 * Reading in all html reference files provided by Processing
 	 */
@@ -768,14 +691,16 @@ public class SplitPane extends JFrame{
 	 */
 	private class DocListener implements DocumentListener {
 		public void insertUpdate(DocumentEvent e) {
-			filterTree(((JTextField) searchBar.getEditor().getEditorComponent()).getText());
+			FilterTree newFilter = new FilterTree(Root, treeModel, tree, leftscrollPane, htmlPane, headerSubheaderNames, filtered);
+			newFilter.filterTree(((JTextField) searchBar.getEditor().getEditorComponent()).getText(), searchAll);
 			enableComponents(leftscrollPane, false);
 			search.setEnabled(true);
 			removeFilter.setVisible(!((JTextField) searchBar.getEditor().getEditorComponent()).getText().isEmpty());
 		}
 		
 		public void removeUpdate(DocumentEvent e) {
-			filterTree(((JTextField) searchBar.getEditor().getEditorComponent()).getText());
+			FilterTree newFilter = new FilterTree(Root, treeModel, tree, leftscrollPane, htmlPane, headerSubheaderNames, filtered);
+			newFilter.filterTree(((JTextField) searchBar.getEditor().getEditorComponent()).getText(), searchAll);
 			enableComponents(leftscrollPane, false);
 			search.setEnabled(true);
 			removeFilter.setVisible(!((JTextField) searchBar.getEditor().getEditorComponent()).getText().isEmpty());

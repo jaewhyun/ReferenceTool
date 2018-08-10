@@ -80,7 +80,6 @@ public class SetHTML extends JEditorPane {
 		// after everything has been read in (initiated) and Search All has been chosen
 		if(savedHTML.containsKey(nodeName) && initiated && searchAll && !searchText.equals("")) {
 			String saved = savedHTML.get(nodeName);
-			
 			// filter for words that may cause weird color change
 			if(searchText.equals("or")
 					|| searchText.equals("for")
@@ -150,7 +149,6 @@ public class SetHTML extends JEditorPane {
 					searchAllExamples.put(nodeName, sb.toString());
 				}
 				
-
 				description = regexer.parseDescription();
 				
 				if(!searchAllDescriptions.containsKey(nodeName)) {
@@ -275,14 +273,12 @@ public class SetHTML extends JEditorPane {
 						codeLines[j] = codeLines[j] + "</span>";
 					} 
 					
-					if(codeLines[j].contains("/*") || codeLines[j].contains("/**")) {
+					if(codeLines[j].contains("/*")) {
 						codeLines[j] = codeLines[j].replace("/*", "<span style=\"color: #5a7aad\">/*");
-						
-						// * this part not quite working * 
-						if(codeLines[j].contains("\\*+\\/")) {
-							codeLines[j] = codeLines[j].replace("\\*+\\/", "*/</span>");
-						}	
-						codeLines[j] = codeLines[j].replaceAll("(\\*+\\/)", "*/</span>");
+					}
+					
+					if(codeLines[j].contains("*/")) {
+						codeLines[j] = codeLines[j].replace("*/", "*/</span>");
 					}
 					
 					code = code + codeLines[j] + "<br>";

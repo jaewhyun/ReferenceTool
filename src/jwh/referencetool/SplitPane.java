@@ -116,23 +116,12 @@ public class SplitPane extends JFrame{
 				filterLabel.setVisible(true);
 				removeFilter.setVisible(false);
 				htmlPane.setText(splashhtml);
-				search.setEnabled(false);
 				if(panel != null) {
 					panel.removeAll();
 					panel.revalidate();
 				}
-				enableComponents(leftscrollPane, true);
 			}
 		});
-	
-		search = new JButton("Search");
-		search.setEnabled(false);
-		search.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				enableComponents(leftscrollPane, true);
-			}
-		});
-		
 				
 		// adding search button and search all checkbox
 		JPanel buttonCheckPanel = new JPanel();
@@ -140,7 +129,7 @@ public class SplitPane extends JFrame{
 		buttonCheckPanel.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
 		buttonCheckPanel.add(searchAll);
 		buttonCheckPanel.add(Box.createRigidArea(new Dimension(20, 0)));
-		buttonCheckPanel.add(search);
+		buttonCheckPanel.add(reset);
 		
 		// establishing the search bar and its layout
 		searchBar = new JComboBox<DefaultMutableTreeNode>();
@@ -150,7 +139,8 @@ public class SplitPane extends JFrame{
 
 		searchBar.setEditable(true);
 		searchBar.setMaximumRowCount(5);
-		searchBar.addActionListener(new ActionListener() {
+
+		((JTextField) searchBar.getEditor().getEditorComponent()).addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				int selStart = textArea.getSelectionStart();
 				int selEnd = textArea.getSelectionEnd();
@@ -226,12 +216,6 @@ public class SplitPane extends JFrame{
 		leftpanel.add(buttonCheckPanel);
 		leftscrollPane.setAlignmentX(Component.CENTER_ALIGNMENT);
 		leftpanel.add(leftscrollPane);
-		
-		// couldn't figure out a way for the button to expand the full width so I put it into a panel instead.
-		JPanel resetPanel = new JPanel();
-		resetPanel.setLayout(new BorderLayout(0,0));
-		resetPanel.add(reset);
-		leftpanel.add(resetPanel);
 		
 		// set left and right
 		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
@@ -432,7 +416,6 @@ public class SplitPane extends JFrame{
 	 * Setting html on the right as well as creating example try buttons and tying it to a new editor
 	 */
 	private void setFile(String nodeName, String original) {
-		
 		htmlPane.parseHTML(null, nodeName, initiated, searchAll.isSelected(), ((JTextField) searchBar.getEditor().getEditorComponent()).getText());  
 		
 		HashMap<String, ArrayList<String>> mapofCodes = htmlPane.getMapofCodes();
@@ -517,10 +500,6 @@ public class SplitPane extends JFrame{
 			String htmlfileName = "";
 			NodeNameGenerator gen = new NodeNameGenerator(headerSubheaderNames);
 			nodeName = gen.generator(node);
-			if(nodeName.equals("color")) {
-				nodeName = nodeName + "_datatype";
-			}
-			
 			if(node.isLeaf()) {
 				htmlfileName = "modes/java/reference/"+nodeName+".html";
 				File htmlfile = Platform.getContentFile(htmlfileName);
@@ -630,10 +609,16 @@ public class SplitPane extends JFrame{
 			
 				setFile(nodeName, node.toString());
 				
-				searchBar.insertItemAt(node, 0);
-				if(searchBar.getItemCount() == 6) {
-					searchBar.removeItemAt(5);
-				}
+				SwingUtilities.invokeLater(new Runnable() {
+				    public void run() {
+				        searchBar.insertItemAt(node, 0);
+				        
+				        if(searchBar.getItemCount() == 6) {
+							searchBar.removeItemAt(5);
+						}
+				    }
+				});
+				
 			} else {
 				// making sure not to open up nonexisting html files for folders with names "Methods" and "Fields"
 				if(!node.isRoot() 
@@ -642,10 +627,15 @@ public class SplitPane extends JFrame{
 						&& !headerSubheaderNames.contains(node.toString())) {
 					setFile(nodeName, node.toString());
 					
-					searchBar.insertItemAt(node, 0);
-					if(searchBar.getItemCount() == 6) {
-						searchBar.removeItemAt(5);
-					}
+					SwingUtilities.invokeLater(new Runnable() {
+					    public void run() {
+					        searchBar.insertItemAt(node, 0);
+					        
+					        if(searchBar.getItemCount() == 6) {
+								searchBar.removeItemAt(5);
+							}
+					    }
+					});
 				}
 			}
 		}
@@ -693,24 +683,14 @@ public class SplitPane extends JFrame{
 		public void insertUpdate(DocumentEvent e) {
 			FilterTree newFilter = new FilterTree(Root, treeModel, tree, leftscrollPane, htmlPane, headerSubheaderNames, filtered);
 			newFilter.filterTree(((JTextField) searchBar.getEditor().getEditorComponent()).getText(), searchAll);
-			enableComponents(leftscrollPane, false);
-			search.setEnabled(true);
-			removeFilter.setVisible(!((JTextField) searchBar.getEditor().getEditorComponent()).getText().isEmpty());
 		}
 		
 		public void removeUpdate(DocumentEvent e) {
 			FilterTree newFilter = new FilterTree(Root, treeModel, tree, leftscrollPane, htmlPane, headerSubheaderNames, filtered);
 			newFilter.filterTree(((JTextField) searchBar.getEditor().getEditorComponent()).getText(), searchAll);
-			enableComponents(leftscrollPane, false);
-			search.setEnabled(true);
-			removeFilter.setVisible(!((JTextField) searchBar.getEditor().getEditorComponent()).getText().isEmpty());
-			if(((JTextField) searchBar.getEditor().getEditorComponent()).getText().equals("")) {
-				enableComponents(leftscrollPane, true);
-			}
 		}
 		
 		public void changedUpdate(DocumentEvent e) {
-			
 		}
 	}
 }

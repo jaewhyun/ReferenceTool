@@ -51,6 +51,10 @@ public class NodeNameGenerator {
 			}
 		}
 		
+		if(nodeName.equals("color")) {
+			nodeName = nodeName + "_datatype";
+		}
+		
 		return nodeName;
 	}
 }

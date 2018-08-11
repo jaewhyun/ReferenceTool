@@ -50,6 +50,7 @@ public class SplitPane extends JFrame{
 	ArrayList<Leaf> trackLeaves = new ArrayList<Leaf>();
 	HashSet<String> headerSubheaderNames = new HashSet<String>();
 	String splashhtml;
+	FilterTree newFilter;
 	
 	int open = 0;
 	int openLocation = 0;
@@ -235,6 +236,19 @@ public class SplitPane extends JFrame{
 		
 		// reading in all html to start and saving it 
 		readinAllHTML();
+		
+		newFilter = new FilterTree(Root, treeModel, tree, leftscrollPane, htmlPane, headerSubheaderNames, filtered);
+
+		// adding function to click searchall whenever and make tree update accordingly
+		searchAll.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if(searchAll.isSelected()) {
+					newFilter.filterTree(((JTextField) searchBar.getEditor().getEditorComponent()).getText(), searchAll);
+				} else {
+					newFilter.filterTree(((JTextField) searchBar.getEditor().getEditorComponent()).getText(), searchAll);
+				}
+			}
+		});
 	}
 	
 	/*
@@ -681,12 +695,10 @@ public class SplitPane extends JFrame{
 	 */
 	private class DocListener implements DocumentListener {
 		public void insertUpdate(DocumentEvent e) {
-			FilterTree newFilter = new FilterTree(Root, treeModel, tree, leftscrollPane, htmlPane, headerSubheaderNames, filtered);
 			newFilter.filterTree(((JTextField) searchBar.getEditor().getEditorComponent()).getText(), searchAll);
 		}
 		
 		public void removeUpdate(DocumentEvent e) {
-			FilterTree newFilter = new FilterTree(Root, treeModel, tree, leftscrollPane, htmlPane, headerSubheaderNames, filtered);
 			newFilter.filterTree(((JTextField) searchBar.getEditor().getEditorComponent()).getText(), searchAll);
 		}
 		

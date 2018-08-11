@@ -51,7 +51,7 @@ public class ReferenceTool implements Tool {
 	  try {
 	  	if(newpane == null) {
 	  		newpane = new SplitPane(base);
-	    		System.out.println("Reference Tool 1.1.0 by Jae Hyun");
+	    		System.out.println("Reference Tool 1.1.1 by Jae Hyun");
 	  	}
 	  	newpane.pack();
 	    	newpane.setVisible(true);

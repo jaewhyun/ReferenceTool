@@ -8,5 +8,5 @@ You can install the Reference tool via the Contribution Manager in the PDE.
 1. Tools > Add Tool...
 2. Select "Reference Tool" and press "Install"
 
-![referencetool1](readme_images_gifs/referencetool1.gif)
-![referencetool2](readme_images_gifs/referencetool2.gif)
+![referencetool](readme_images_gifs/referencetool.gif)
+
